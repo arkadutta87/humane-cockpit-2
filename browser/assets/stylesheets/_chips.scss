@@ -1,0 +1,52 @@
+.chip {
+  display: inline-block;
+  height: 2.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(0,0,0,.6);
+  line-height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 4px;
+  background-color: $chip-bg-color;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-left: 0.5rem;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &.big {
+    font-size: 1.4rem;
+    height: 3rem;
+    line-height: 3rem;
+    font-weight: 700;
+  }
+
+  &.small {
+    font-size: 0.9rem;
+    height: 2rem;
+    line-height: 2rem;
+  }
+
+  &.active {
+    background-color: $primary-color !important;
+    color: white !important;
+  }
+
+  img {
+    float: left;
+    margin: 0 8px 0 -12px;
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+  }
+
+  i.material-icons {
+    cursor: pointer;
+    float: right;
+    font-size: 16px;
+    line-height: 32px;
+    padding-left: 8px;
+  }
+}

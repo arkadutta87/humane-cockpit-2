@@ -1,0 +1,33 @@
+//$primary-light: color("teal", "lighten-2");
+//$primary-color: color("teal", "lighten-1");
+//$primary-dark: color("teal", "base");
+//$primary-darker: color("teal", "darken-1");
+//$primary-darkest: color("teal", "darken-2");
+$primary-light: color("blue", "base");
+$primary-color: color("blue", "darken-1");
+$primary-dark: color("blue", "darken-2");
+$primary-darker: color("blue", "darken-3");
+$primary-darkest: color("blue", "darken-4");
+
+$secondary-color: color("materialize-red", "lighten-2");
+$secondary-dark: color("materialize-red", "lighten-1");
+$secondary-darker: color("materialize-red", "base");
+$secondary-darkest: color("materialize-red", "darken-1");
+
+$grey-lightest: color("grey", "lighten-3");
+$grey-lighter: color("grey", "lighten-2");
+$grey-light: color("grey", "lighten-1");
+$grey: color("grey", "base");
+$grey-dark: color("grey", "darken-1");
+$grey-darker: color("grey", "darken-2");
+$grey-darkest: color("grey", "darken-3");
+
+$footer-bg-color: transparent;
+$button-color: $primary-color;
+$input-focus-color: $primary-color;
+$input-error-color: $secondary-color;
+$input-success-color: $primary-color;
+
+$body-color: $grey-darker;
+$body-bg-color: $grey-lighter;
+$body-bg-color-mobile: $grey-dark;

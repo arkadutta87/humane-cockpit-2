@@ -1,0 +1,51 @@
+.suggestions {
+  .time-taken {
+    font-size: 0.8em;
+    color: $grey;
+  }
+
+  .query {
+    color: $primary-color;
+    font-weight: 700;
+  }
+
+  .suggestion-section-heading {
+    margin-bottom: 0.5rem;
+    color: $primary-color;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .suggestion.card {
+    padding: 0.5rem;
+
+    .suggestion-value {
+      margin: 0;
+
+      .suggestion-stats {
+        color: $grey;
+        font-size: 0.8em;
+        text-align: center;
+        line-height: 1.2;
+
+        th {
+          font-weight: normal;
+        }
+
+        tr:last-child {
+          border-bottom: none;
+        }
+
+        th, td {
+          padding: 5px;
+        }
+      }
+    }
+  }
+
+  .suggestion.card + .suggestion.card {
+    margin-top: 4px;
+  }
+}

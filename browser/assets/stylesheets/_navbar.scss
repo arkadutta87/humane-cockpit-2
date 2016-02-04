@@ -1,0 +1,238 @@
+/*** Navbar ***/
+$sidenav-link-active-bg-color: lighten($primary-color, 15%);
+
+$navbar-padding: 50px;
+$navbar-padding-mobile: 10px;
+$navbar-height: 48px;
+$navbar-height-mobile: 40px;
+
+$tab-bar-one-height: 36px;
+$tab-bar-one-height-mobile: 20px;
+
+$navbar-logo-height: 28px;
+$navbar-logo-height-mobile: 24px;
+
+$white: #ffffff;
+$topbar-background-color: darken($primary-color, 15%);
+$topbar-color: darken($white, 10%);
+$topbar-hover-color: $white;
+
+$brand-logo-color: $primary-darker;
+
+$modal-navbar-background-color: $grey-dark;
+
+.navbar-fixed.top-nav:not(.landing-page) {
+  nav {
+    .top-bar {
+      flex-grow: 1;
+
+      background-color: $topbar-background-color;
+
+      .page-title {
+        color: $topbar-color;
+        @include transition(color .28s ease);
+
+        &:hover {
+          color: $topbar-hover-color;
+        }
+      }
+
+      .page-header {
+        a {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: $topbar-color;
+          @include transition(color .28s ease);
+
+          &:hover {
+            color: $topbar-hover-color;
+          }
+        }
+      }
+
+      .btn {
+        background-color: $topbar-color;
+        color: $body-color;
+
+        &:hover {
+          background-color: $topbar-hover-color;
+        }
+      }
+    }
+  }
+}
+
+.navbar-fixed.top-nav {
+  nav {
+    background-color: transparent;
+
+    .top-bar {
+      ul {
+        li {
+          a:not(.btn) {
+            padding: 0;
+          }
+        }
+      }
+    }
+
+    .top-bar {
+      .search-field-nav {
+        @extend .input-field;
+        margin-top: 0;
+        padding: 0 1rem;
+        margin-left: 1rem;
+
+        input {
+          padding-left: 0.25rem;
+        }
+      }
+
+      .user-profile-nav, .brand-header-nav {
+        a {
+          .fa {
+            font-size: 2.5rem;
+
+            &:before {
+              color: $topbar-color;
+              @include transition(color .28s ease);
+            }
+          }
+
+          &:hover {
+            .fa {
+              &:before {
+                color: $topbar-hover-color;
+              }
+            }
+          }
+        }
+      }
+
+      .brand-header-nav {
+        a {
+          img {
+            height: $navbar-logo-height;
+            margin-top: ($navbar-height - $navbar-logo-height) / 2;
+
+            @media #{$small-and-down} {
+              height: $navbar-logo-height-mobile;
+              margin-top: ($navbar-height_mobile - $navbar-logo-height-mobile) / 2;
+            }
+          }
+        }
+      }
+
+      ul {
+        &.left {
+          left: 1rem;
+
+          @media #{$small-and-down} {
+            left: 0.5rem;
+          }
+        }
+
+        &.right {
+          right: 1rem;
+
+          @media #{$small-and-down} {
+            right: 0.5rem;
+          }
+
+          li {
+            margin-right: 1rem;
+
+            &:last-child {
+              margin-right: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+//
+// navbar heights
+//
+.navbar-fixed.top-nav {
+  nav {
+    .top-bar {
+      height: $navbar-height;
+
+      @media #{$small-and-down} {
+        height: $navbar-height-mobile;
+      }
+
+      .brand-header {
+        a {
+          .logo {
+            height: $navbar-logo-height;
+            vertical-align: middle;
+
+            @media #{$small-and-down} {
+              height: $navbar-logo-height-mobile;
+            }
+          }
+        }
+      }
+
+      ul {
+        max-height: $navbar-height;
+
+        @media #{$small-and-down} {
+          max-height: $navbar-height-mobile;
+        }
+
+        li {
+          height: $navbar-height;
+          line-height: $navbar-height;
+
+          @media #{$small-and-down} {
+            height: $navbar-height-mobile;
+            line-height: $navbar-height-mobile;
+          }
+
+          a:not(.btn) {
+            height: $navbar-height;
+            line-height: $navbar-height;
+
+            @media #{$small-and-down} {
+              height: $navbar-height-mobile;
+              line-height: $navbar-height-mobile;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.navbar-dropdown.dropdown-content {
+  li.dropdown-header {
+    background-color: $primary-darker;
+    padding: 0 1rem;
+    height: $tab-bar-one-height;
+
+    @media #{$small-and-down} {
+      height: $tab-bar-one-height-mobile;
+    }
+
+    & > span {
+      line-height: $tab-bar-one-height !important;
+      padding: 0;
+      font-size: 1rem;
+      color: white;
+
+      @media #{$small-and-down} {
+        line-height: $tab-bar-one-height-mobile !important;
+      }
+    }
+  }
+}
+
+nav {
+  .nav-wrapper {
+    @include flexbox();
+  }
+}

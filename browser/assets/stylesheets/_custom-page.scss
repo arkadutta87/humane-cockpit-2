@@ -1,0 +1,45 @@
+.page-content {
+  main {
+    margin-top: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .section:first-child {
+    padding-top: 0;
+  }
+
+  .heading {
+    table.params {
+      font-size: 0.9em;
+      td {
+        padding: 0;
+      }
+
+      td.param-key {
+        width: 100px;
+      }
+
+      td.param-value {
+        color: $primary-color-dark;
+      }
+    }
+
+    .time-taken {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9em;
+      color: $grey;
+    }
+  }
+
+  .notes {
+    color: $grey;
+
+    ol {
+      li {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+      }
+    }
+  }
+}

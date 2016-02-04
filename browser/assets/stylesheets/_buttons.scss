@@ -1,0 +1,94 @@
+.btn, .btn-flat {
+  line-height: 2.5rem;
+  margin-bottom: 0;
+  height: 2.5rem;
+  padding: 0 2rem;
+
+  border: none;
+  border-radius: 16px;
+  display: inline-block;
+  outline: 0;
+  text-transform: uppercase;
+  vertical-align: middle;
+  // Gets rid of tap active state
+  -webkit-tap-highlight-color: transparent;
+
+  //& > * {
+  //  font-size: 1.1rem;
+  //  //vertical-align: middle;
+  //  //line-height: 2.5em;
+  //}
+
+  .fa.icon-right {
+    margin-left: 10px;
+  }
+
+  .fa.icon-left {
+    margin-right: 10px;
+  }
+
+  &.right {
+    margin-left: 1rem;
+  }
+}
+
+// Raised Button
+.btn {
+  text-decoration: none;
+  color: $button-color-raised !important;
+  background-color: $button-color;
+  text-align: center;
+  letter-spacing: .5px;
+  //@extend .z-depth-1;
+  @include transition(.2s ease-out);
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten($button-color, 5%);
+    @extend .z-depth-1-half;
+  }
+}
+
+a.btn {
+  &:hover {
+    color: $button-color-raised;
+  }
+}
+
+// Flat button
+.btn-flat {
+  box-shadow: none;
+  background-color: transparent;
+  color: $button-color-flat;
+  cursor: pointer;
+  padding: 0 0.5rem;
+  border-radius: unset;
+}
+
+.submit-button, a.submit-button {
+  @extend .btn;
+}
+
+.remove-button {
+  @extend .btn;
+  background-color: $secondary-color;
+
+  &:hover {
+    background-color: lighten($secondary-color, 5%);
+  }
+}
+
+.cancel-button, .skip-button, a.cancel-button, a.skip-button {
+  @extend .btn;
+  color: $grey !important;
+  //background-color: $grey;
+  border: 1px solid $grey;
+  background-color: transparent;
+
+  &:hover {
+    //color: darken($grey, 5%) !important;
+    background-color: lighten($grey, 5%);
+    color: white !important;
+    //@extend .z-depth-1-half;
+  }
+}

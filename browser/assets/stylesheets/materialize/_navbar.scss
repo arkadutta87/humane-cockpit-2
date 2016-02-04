@@ -1,0 +1,219 @@
+$ios-status-bar-height: 20px !default;
+$navbar-link-color: $grey-dark !default;
+$navbar-background-color: #fff !default;
+$navbar-color: $grey-dark !default;
+$brand-logo-color: $primary-color !default;
+
+nav {
+  color: $navbar-color;
+  //@extend .z-depth-1;
+  background-color: $navbar-background-color;
+  width: 100%;
+  height: $navbar-height-mobile;
+  //border-bottom: 1px solid $grey-lighter;
+
+  @media #{$medium-and-up} {
+    height: $navbar-height;
+  }
+
+  a {
+    color: $navbar-link-color;
+  }
+
+  .nav-wrapper {
+    position: relative;
+    height: 100%;
+  }
+
+  i.fa, span.fa {
+    font-size: 1.5rem;
+    vertical-align: 0 !important;
+
+    @media #{$medium-and-up} {
+      font-size: 1.5rem;
+    }
+  }
+
+  @media #{$large-and-up} {
+    a.button-collapse {
+      display: none;
+    }
+  }
+
+  // Collapse button
+  .button-collapse {
+    float: left;
+    position: relative;
+    z-index: 1;
+    height: $navbar-height-mobile;
+
+    @media #{$medium-and-up} {
+      height: $navbar-height;
+    }
+
+    i {
+      font-size: 2.7rem;
+      height: $navbar-height-mobile;
+      line-height: $navbar-height-mobile;
+
+      @media #{$medium-and-up} {
+        height: $navbar-height;
+        line-height: $navbar-height;
+      }
+    }
+  }
+
+  // Logo
+  .brand-logo {
+    position: absolute;
+    color: $brand-logo-color;
+    display: inline-block;
+    font-size: 2.1rem;
+    font-weight: 700;
+    padding: 0;
+
+    &.center {
+      top: 50%;
+      left: 50%;
+      @include transform(translate(-50%, -50%));
+    }
+
+    @media #{$medium-and-down} {
+      top: 50%;
+      left: 50%;
+      @include transform(translate(-50%, -50%));
+    }
+
+    &.right {
+      right: 0.5rem;
+      padding: 0;
+    }
+  }
+
+  // Navbar Links
+  ul {
+    margin: 0;
+    max-height: $navbar-height-mobile;
+    position: relative;
+
+    @media #{$medium-and-up} {
+      max-height: $navbar-height;
+    }
+
+    li {
+
+      float: left;
+      padding: 0;
+      height: $navbar-height-mobile;
+      line-height: $navbar-height-mobile;
+
+      @media #{$medium-and-up} {
+        height: $navbar-height;
+        line-height: $navbar-height;
+      }
+
+      //&:hover {
+      //  background-color: rgba(0, 0, 0, .1);
+      //}
+    }
+
+    a {
+      @include transition(color .3s);
+
+      font-size: 1rem;
+      color: $navbar-link-color;
+      display: inline-block;
+      padding: 0 15px;
+
+      &:hover {
+        color: darken($navbar-link-color, 25%);
+      }
+    }
+
+    &.left {
+      position: absolute;
+      //top: 0;
+      left: 0;
+    }
+
+    &.right {
+      position: absolute;
+      //top: 0;
+      right: 0;
+    }
+  }
+
+  // Navbar Search Form
+  .input-field {
+    margin: 0;
+
+    input {
+      height: 100%;
+      font-size: 1.2rem;
+      border: none;
+      padding-left: 2rem;
+
+      &:focus, &[type=text]:valid, &[type=password]:valid,
+      &[type=email]:valid, &[type=url]:valid, &[type=date]:valid {
+        border: none;
+        box-shadow: none;
+      }
+    }
+    label {
+      top: 0;
+      left: 0;
+
+      i {
+        color: rgba(255, 255, 255, .7);
+        @include transition(color .3s);
+      }
+      &.active i {
+        color: #fff;
+      }
+      &.active {
+        @include transform(translateY(0));
+      }
+    }
+
+  }
+
+}
+
+// Fixed Navbar
+.navbar-fixed {
+  position: relative;
+  height: $navbar-height-mobile;
+  z-index: 998;
+
+  @media #{$medium-and-up} {
+    height: $navbar-height;
+  }
+
+  nav {
+    position: fixed;
+    left: 0;
+  }
+
+  &.top-nav {
+    nav {
+      top: 0;
+    }
+  }
+
+  &.bottom-nav {
+    nav {
+      bottom: 0;
+    }
+  }
+}
+
+body.ios {
+  .navbar-fixed.top-nav {
+    height: $navbar-height-mobile + $ios-status-bar-height;
+
+    nav {
+      height: $navbar-height-mobile + $ios-status-bar-height;
+      padding-top: $ios-status-bar-height;
+    }
+  }
+}
