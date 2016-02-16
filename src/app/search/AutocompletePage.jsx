@@ -10,7 +10,7 @@ import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxContro
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
 
-import {default as AutocompleteStore, FieldToSearchParams} from './AutocompleteStore';
+import {default as AutocompleteStore} from './AutocompleteStore';
 
 const StoreKey = 'AutocompleteStore';
 
@@ -19,31 +19,39 @@ const StoreKey = 'AutocompleteStore';
 const suggestionValue = (data) => {
     const suggestion = data.suggestion;
 
+    const properties = data.properties;
+    const statFields = properties && properties.get('statFields') || Immutable.List();
+    const valueField = properties && properties.get('valueField') || 'value';
+    const unicodeValueField = properties && properties.get('unicodeValueField') || 'unicodeValue';
+    const displayField = properties && properties.get('displayField') || 'unicodeValue';
+    const searchMode = properties && properties.get('searchMode');
+    const searchType = properties && properties.get('searchType');
+
     let url = null;
-    if (!data.noClick) {
+    if (searchMode && searchType) {
         let queryParams = {
-            text: suggestion.get(data.valueField),
-            unicodeText: suggestion.get(data.unicodeValueField),
+            text: suggestion.get(valueField),
+            unicodeText: suggestion.get(unicodeValueField),
             lang: suggestion.get('lang'),
             filter: data.filter.toJS(),
             originalInput: data.inputText
         };
 
-        queryParams = _.assign(queryParams, FieldToSearchParams[data.type]);
+        queryParams = _.assign(queryParams, {mode: searchMode, type: searchType});
 
         url = `/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
     }
 
     let title = null;
     if (url) {
-        title = <a target="_blank" href={url}>{suggestion.get(data.unicodeValueField)} ({suggestion.get('lang')})</a>;
+        title = <a target="_blank" href={url}>{suggestion.get(displayField)} ({suggestion.get('lang')})</a>;
     } else {
-        title = <span>{suggestion.get(data.unicodeValueField)} ({suggestion.get('lang')})</span>;
+        title = <span>{suggestion.get(displayField)} ({suggestion.get('lang')})</span>;
     }
 
     const statKeys = [];
     const statValues = [];
-    data.statFields.forEach(field => field.forEach((value, key) => {
+    statFields.forEach(field => field.forEach((value, key) => {
         statKeys.push(<th key={key}>{key}</th>);
         statValues.push(<td key={key}>{suggestion.get(value)}</td>);
     }));
@@ -97,14 +105,10 @@ const SuggestionList = (props) => {
         if (value.count() > 0) {
             const properties = props.appProperties.getIn(['autocomplete', key]);
             const name = properties && properties.get('name') || key;
-            const valueField = properties && properties.get('valueField') || 'value';
-            const unicodeValueField = properties && properties.get('unicodeValueField') || 'unicodeValue';
-            const noClick = properties && properties.get('noSearch') || false;
-            const statFields = properties && properties.get('statFields') || Immutable.List();
 
             suggestionViews.push(<div className="section small" key={key}>
                 <div className="suggestion-section-heading"><strong>{name} suggestions: {value.count() || 0}</strong></div>
-                {value.map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, noClick, valueField, unicodeValueField, statFields}} key={`${key}-${index}`}/>)}
+                {value.map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, properties}} key={`${key}-${index}`}/>)}
             </div>);
         }
     });

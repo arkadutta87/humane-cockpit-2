@@ -4,12 +4,6 @@ import Immutable from 'immutable';
 
 import FluxStore from 'reactjs-web-boilerplate/lib/app/flux/FluxStore';
 
-export const FieldToSearchParams = {
-    author: {mode: 'autocomplete', type: 'author_entity'},
-    category: {mode: 'autocomplete', type: 'category_entity'},
-    publisher: {mode: 'autocomplete', type: 'publisher_entity'}
-};
-
 export default class extends FluxStore {
     constructor(key, fluxContext, fluxController) {
         super(key, fluxContext, fluxController);
