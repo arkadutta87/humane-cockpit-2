@@ -29,48 +29,50 @@ const SearchResult = (props) => {
             if (_.isString(valueProperty)) {
                 value = result.get(valueProperty);
             } else if (valueProperty instanceof Immutable.List) {
-                value = result.getIn(valueProperty);
+                value = result.getIn(valueProperty.toJS());
             } else {
                 const name = valueProperty.get('field');
                 if (_.isString(name)) {
                     value = result.get(name);
-                } else if (valueProperty instanceof Immutable.List) {
-                    value = result.getIn(name);
+                } else if (name instanceof Immutable.List) {
+                    value = result.getIn(name.toJS());
                 }
 
                 const transform = valueProperty.get('transform');
-                if (transform) {
+                if (transform && _.isFunction(transform)) {
                     value = transform(value);
                 }
 
-                const type = valueProperty.get('type');
+                if (value) {
+                    const type = valueProperty.get('type');
 
-                if (type === 'Date') {
-                    value = moment(value).format(valueProperty.get('format') || 'MMM Do YYYY');
-                } else if (type === 'Duration') {
-                    value = moment(value).fromNow();
-                } else if (type === 'Image') {
-                    value = <img src={value}/>;
-                } else if (type === 'Chip') {
-                    value = value.map(item => <span className="category chip small" key={item}>{item}</span>);
-                } else if (type === 'Table') {
-                    value = (<table>
-                        <thead>
-                        <tr>
+                    if (type === 'Date') {
+                        value = moment(value).format(valueProperty.get('format') || 'MMM Do YYYY');
+                    } else if (type === 'Duration') {
+                        value = moment(value).fromNow();
+                    } else if (type === 'Image') {
+                        value = <img src={value}/>;
+                    } else if (type === 'Chip') {
+                        value = value.map(item => <span className="category chip small" key={item}>{item}</span>);
+                    } else if (type === 'Table') {
+                        value = (<table>
+                            <thead>
+                            <tr>
+                                {
+                                    valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map((columnValue, columnKey) => <th key={columnKey}>{columnKey}</th>))
+                                }
+                            </tr>
+                            </thead>
+                            <tbody>
                             {
-                                valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map((columnValue, columnKey) => <th key={columnKey}>{columnKey}</th>))
+                                value.map(item =>
+                                  <tr key={item.get(valueProperty.get('idField' || 'id'))}>
+                                      {valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map((columnValue, columnKey) => <td key={columnKey}>{item.get(columnValue)}</td>))}
+                                  </tr>)
                             }
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {
-                            value.map(item =>
-                              <tr key={item.get(valueProperty.get('idField' || 'id'))}>
-                                  {valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map((columnValue, columnKey) => <td key={columnKey}>{item.get(columnValue)}</td>))}
-                              </tr>)
-                        }
-                        </tbody>
-                    </table>);
+                            </tbody>
+                        </table>);
+                    }
                 }
             }
 
