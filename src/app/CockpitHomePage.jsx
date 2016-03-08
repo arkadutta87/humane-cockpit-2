@@ -41,6 +41,8 @@ const View = (props) => {
             <a href={url} target="_blank">{name}</a>
         </li>);
     }
+
+    return <noscript/>;
 };
 
 View.propTypes = {
@@ -59,7 +61,7 @@ export default React.createClass({
     render() {
         const viewsProperties = this.getAppProperties().get('views');
 
-        const views = viewsProperties.map((data, index) => <View data={data} depth={0} key={index}/>);
+        const views = viewsProperties && viewsProperties.map((data, index) => <View data={data} depth={0} key={index}/>);
 
         return (<div className="page-content cockpit-page cockpit-home-page">
             <header>

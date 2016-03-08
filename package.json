@@ -1,6 +1,6 @@
 {
   "name": "humane-cockpit",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Cockpit module for Humane Search",
   "private": true,
   "scripts": {
@@ -12,28 +12,27 @@
   "author": "Shailendra Sharma",
   "license": "360fy Proprietary",
   "dependencies": {
-    "bluebird": "^3.1.5",
+    "bluebird": "^3.3.4",
     "classnames": "^2.2.3",
-    "config": "^1.19.0",
     "events": "^1.1.0",
     "immutable": "^3.7.6",
-    "js-yaml": "^3.5.2",
-    "lodash": "^4.0.1",
-    "moment": "^2.11.1",
+    "js-yaml": "^3.5.3",
+    "lodash": "^4.6.1",
+    "moment": "^2.12.0",
     "qs": "^6.1.0",
-    "react": "^0.14.6",
-    "react-dom": "^0.14.6",
-    "react-router": "^2.0.0-rc5",
-    "reactjs-web-boilerplate": "https://private-npm-releases.s3.amazonaws.com/reactjs-web-boilerplate-1.0.5.tgz",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7",
+    "react-router": "^2.0.0",
+    "reactjs-web-boilerplate": "https://private-npm-releases.s3.amazonaws.com/reactjs-web-boilerplate-1.0.6.tgz",
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
-    "babel-core": "^6.4.5",
-    "babel-preset-node5": "^10.5.0",
-    "babel-preset-react": "^6.3.13",
-    "eslint": "^1.10.3",
-    "eslint-config-360fy": "https://private-npm-releases.s3.amazonaws.com/eslint-config-360fy-1.0.0.tgz",
-    "eslint-plugin-react": "^3.16.1"
+    "babel-core": "^6.6.5",
+    "babel-preset-node5": "^10.8.0",
+    "babel-preset-react": "^6.5.0",
+    "eslint": "^2.3.0",
+    "eslint-config-360fy": "https://private-npm-releases.s3.amazonaws.com/eslint-config-360fy-1.0.1.tgz",
+    "eslint-plugin-react": "^4.2.0"
   },
   "eslintConfig": {
     "extends": "360fy"

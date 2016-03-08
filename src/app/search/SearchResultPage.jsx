@@ -59,7 +59,7 @@ const SearchResult = (props) => {
                             <thead>
                             <tr>
                                 {
-                                    valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map((columnValue, columnKey) => <th key={columnKey}>{columnKey}</th>))
+                                    valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map(column => <th key={column[0]}>{column[1]}</th>))
                                 }
                             </tr>
                             </thead>
@@ -67,7 +67,7 @@ const SearchResult = (props) => {
                             {
                                 value.map(item =>
                                   <tr key={item.get(valueProperty.get('idField' || 'id'))}>
-                                      {valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map((columnValue, columnKey) => <td key={columnKey}>{item.get(columnValue)}</td>))}
+                                      {valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map(column => <td key={column[0]}>{item.get(column[1])}</td>))}
                                   </tr>)
                             }
                             </tbody>
@@ -175,9 +175,7 @@ export default React.createClass({
     mixins: [FluxControllerMixin],
 
     getInitialState() {
-        this.getFluxController()
-          .createStore(SearchResultStore, StoreKey)
-          .setParams(QueryString.parse(this.props.location.search.replace(/^\?/, ''), {allowDots: true}));
+        this.getFluxController().createStore(SearchResultStore, StoreKey);
         this.registerStore(StoreKey);
 
         return {
@@ -186,7 +184,9 @@ export default React.createClass({
     },
 
     componentDidMount() {
-        this.loadSearchResults(0);
+        if (this.props.location.search) {
+            this.loadSearchResults(null, QueryString.parse(this.props.location.search.replace(/^\?/, ''), {allowDots: true}));
+        }
     },
 
     store() {
@@ -199,36 +199,59 @@ export default React.createClass({
         </div>);
     },
 
-    loadSearchResults(page) {
-        this.store().search(page);
+    loadSearchResults(e, params) {
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        this.store().search(params);
     },
 
     render() {
-        let currentPage = 0;
-        let hasMoreResults = false;
-        let size = 0;
-
-        const searchResults = this.state.data.get('results');
-        if (searchResults) {
-            currentPage = this.state.data.getIn(['params', 'page']);
-            hasMoreResults = this.state.data.get('hasMoreResults');
-            size = searchResults && searchResults.count();
-        }
-
         let resultListView = null;
-        if (size > 0) {
-            resultListView = (<InfiniteScroll
-              currentPage={currentPage}
-              loadMore={this.loadSearchResults}
-              hasMore={hasMoreResults}
-              className="search-result-list"
-              loader={<div className="loader">Loading ...</div>}>
-                {this.state.data.get('results').map(result => (<SearchResult data={{result, location: this.props.location, appProperties: this.getAppProperties()}} key={result.get('id')}/>))}
-            </InfiniteScroll>);
-        } else {
-            resultListView = (<div className="no-results">
-                <span className="message">No Results to show!</span>
+        if (this.state.data.get('multi')) {
+            const resultGroupViews = this.state.data.get('results').entrySeq().map(entry => {
+                const resultGroup = entry[1];
+                const name = resultGroup.get('name');
+                const type = resultGroup.get('type');
+                const currentPage = resultGroup.get('page');
+                const hasMoreResults = resultGroup.get('hasMoreResults');
+
+                let showMoreResultsLink = null;
+                if (hasMoreResults) {
+                    showMoreResultsLink = <div className="search-result-navigation"><a href="" onClick={e => this.loadSearchResults(e, {page: currentPage + 1, type})}>+ Show more results</a></div>;
+                }
+
+                return (<div className="result-group">
+                    <h5>Results for {name}</h5>
+                    {resultGroup.get('results').map(result => (<SearchResult data={{result, location: this.props.location, appProperties: this.getAppProperties()}} key={result.get('id')}/>))}
+                    {showMoreResultsLink}
+                </div>);
+            });
+            resultListView = (<div className="search-result-list">
+                {resultGroupViews}
             </div>);
+        } else {
+            const searchResults = this.state.data.get('results');
+            if (searchResults && searchResults.count() > 0) {
+                const currentPage = this.state.data.get('page');
+                const hasMoreResults = this.state.data.get('hasMoreResults');
+
+                let showMoreResultsLink = null;
+                if (hasMoreResults) {
+                    showMoreResultsLink = <div className="search-result-navigation"><a href="" onClick={e => this.loadSearchResults(e, {page: currentPage + 1})}>+ Show more results</a></div>;
+                }
+
+                resultListView = (<div className="search-result-list">
+                    {this.state.data.get('results').map(result => (<SearchResult data={{result, location: this.props.location, appProperties: this.getAppProperties()}} key={result.get('id')}/>))}
+                    {showMoreResultsLink}
+                </div>);
+            } else {
+                resultListView = (<div className="no-results">
+                    <span className="message">No Results to show!</span>
+                </div>);
+            }
         }
 
         return (<div className="page-content cockpit-page search-result-page">

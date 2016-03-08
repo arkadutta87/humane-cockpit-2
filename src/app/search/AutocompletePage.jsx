@@ -23,12 +23,22 @@ const suggestionValue = (data) => {
     const statFields = properties && properties.get('statFields') || Immutable.List();
     const valueField = properties && properties.get('valueField') || 'value';
     const unicodeValueField = properties && properties.get('unicodeValueField') || 'unicodeValue';
-    const displayField = properties && properties.get('displayField') || 'unicodeValue';
+
     const searchMode = properties && properties.get('searchMode');
     const searchType = properties && properties.get('searchType');
 
+    let display = properties && _.isFunction(properties.get('display')) && properties.get('display')(suggestion);
+    if (!display) {
+        const displayField = properties && properties.get('displayField') || 'unicodeValue';
+        if (suggestion.get('lang')) {
+            display = `${suggestion.get(displayField)} (${suggestion.get('lang')})`;
+        } else {
+            display = suggestion.get(displayField);
+        }
+    }
+
     let url = null;
-    if (searchMode && searchType) {
+    if (searchMode) {
         let queryParams = {
             text: suggestion.get(valueField),
             unicodeText: suggestion.get(unicodeValueField),
@@ -44,9 +54,9 @@ const suggestionValue = (data) => {
 
     let title = null;
     if (url) {
-        title = <a target="_blank" href={url}>{suggestion.get(displayField)} ({suggestion.get('lang')})</a>;
+        title = <a target="_blank" href={url}>{display}</a>;
     } else {
-        title = <span>{suggestion.get(displayField)} ({suggestion.get('lang')})</span>;
+        title = <span>{display}</span>;
     }
 
     const statKeys = [];
@@ -101,17 +111,30 @@ const SuggestionList = (props) => {
 
     const suggestionViews = [];
 
-    suggestions.get('results').forEach((value, key) => {
-        if (value.count() > 0) {
+    const buildSuggestionViews = (key, results) => {
+        if (results.count() > 0) {
             const properties = props.appProperties.getIn(['autocomplete', key]);
             const name = properties && properties.get('name') || key;
 
             suggestionViews.push(<div className="section small" key={key}>
-                <div className="suggestion-section-heading"><strong>{name} suggestions: {value.count() || 0}</strong></div>
-                {value.map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, properties}} key={`${key}-${index}`}/>)}
+                <div className="suggestion-section-heading"><strong>{name} suggestions: {results.count() || 0}</strong></div>
+                {results.map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, properties}} key={`${key}-${index}`}/>)}
             </div>);
         }
-    });
+    };
+
+    // if multiple types of results - then resultGroups => {key : { type, results, totalResults }}
+    // if single type of results - then { type, results, totalResults }
+    if (suggestions.get('multi')) {
+        suggestions.get('results').forEach((value, key) => {
+            buildSuggestionViews(key, value.get('results'));
+        });
+    } else {
+        const results = suggestions.get('results');
+        const key = suggestions.get('name');
+
+        buildSuggestionViews(key, results);
+    }
 
     return (<div className="suggestions">
         <div className="section small"><span>Showing auto completion suggestions for:</span> <span className="query">{text}</span> <span

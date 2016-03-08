@@ -44,5 +44,13 @@
 }
 
 .card.search-result + .card.search-result {
+  margin-top: 2rem;
+}
+
+.result-group + .result-group {
   margin-top: 4rem;
+}
+
+.search-result-navigation {
+  margin-top: 2rem;
 }
