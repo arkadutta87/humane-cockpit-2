@@ -16,10 +16,10 @@
   }
 
   .card-header + .card-body, .card-body + .card-footer {
-    margin-top: 2rem;
+    margin-top: 1rem;
 
     @media #{$small-and-down} {
-      margin-top: 1.5rem;
+      margin-top: 0.75rem;
     }
   }
 
@@ -54,5 +54,12 @@
       padding-bottom: 2px;
       border-bottom: 1px solid darken($link-color, 12%);
     }
+  }
+}
+
+.left-section, .right-section {
+  .card {
+    background-color: lighten($grey-lighter, 4%);
+    border: 1px solid white;
   }
 }

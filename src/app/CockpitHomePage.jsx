@@ -5,6 +5,7 @@ import QueryString from 'qs';
 import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxControllerMixin';
 
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
+import LeftSection from 'reactjs-web-boilerplate/lib/app/components/LeftSection';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
 
 const ViewSectionHeader = (props) => {
@@ -22,12 +23,14 @@ const View = (props) => {
         return (<li className="section">
             <ViewSectionHeader data={{name, depth: props.depth}}/>
             <ul>
-                {props.data.get('items').map((item, index) => <View key={index} data={item} depth={props.depth + 1}/>)}
+                {props.data.get('items').map((item, index) => <View key={index} data={item} appProperties={props.appProperties} depth={props.depth + 1}/>)}
             </ul>
         </li>);
     } else if (type === 'data') { // TODO: later can be chart views etc
         const viewType = props.data.getIn(['params', 'type']);
         const filter = props.data.getIn(['params', 'filter']);
+
+        console.log('Filter: ', filter.toJS());
 
         const params = QueryString.stringify({
             filter: filter && filter.toJS(),
@@ -35,7 +38,9 @@ const View = (props) => {
             __view_type__: type
         }, {allowDots: true});
 
-        const url = `/data-view/${viewType}?${params}`;
+        console.log('Params: ', params);
+
+        const url = `${props.appProperties && props.appProperties.get('cockpitUrlPrefix') || ''}/data-view/${viewType}?${params}`;
 
         return (<li>
             <a href={url} target="_blank">{name}</a>
@@ -46,7 +51,8 @@ const View = (props) => {
 };
 
 View.propTypes = {
-    depth: React.PropTypes.number.isRequired
+    depth: React.PropTypes.number.isRequired,
+    appProperties: React.PropTypes.object
 };
 
 export default React.createClass({
@@ -59,9 +65,10 @@ export default React.createClass({
     },
 
     render() {
-        const viewsProperties = this.getAppProperties().get('views');
+        const appProperties = this.getAppProperties();
+        const viewsProperties = appProperties && appProperties.get('views');
 
-        const views = viewsProperties && viewsProperties.map((data, index) => <View data={data} depth={0} key={index}/>);
+        const views = viewsProperties && viewsProperties.map((data, index) => <View data={data} appProperties={appProperties} depth={0} key={index}/>);
 
         return (<div className="page-content cockpit-page cockpit-home-page">
             <header>
@@ -71,12 +78,13 @@ export default React.createClass({
             </header>
             <main>
                 <div className="row">
+                    <LeftSection/>
                     <MidSection>
                         <div className="section large">
                             <h3 className="underline">Demos</h3>
                             <ul>
                                 <li>
-                                    <a href="/autocomplete" target="_blank">
+                                    <a href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/autocomplete`} target="_blank">
                                         Autocomplete Demo
                                     </a>
                                 </li>

@@ -57,7 +57,7 @@ input[type=search],
 textarea.materialize-textarea,
 select {
   outline: none;
-  height: 3rem;
+  height: 4rem;
   margin-bottom: 0;
   border: 1px solid $grey-light;
   border-radius: 2px;
@@ -69,7 +69,7 @@ select {
 
   // General Styles
   width: 100%;
-  font-size: 1rem;
+  font-size: 1.2rem;
   box-shadow: none;
 
   // Focused input style

@@ -4,6 +4,7 @@ import Immutable from 'immutable';
 import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxControllerMixin';
 
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
+import LeftSection from 'reactjs-web-boilerplate/lib/app/components/LeftSection';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
 
 import {default as TermVectorsStore} from './TermVectorsStore';
@@ -66,6 +67,7 @@ export default React.createClass({
             </header>
             <main>
                 <div className="row">
+                    <LeftSection/>
                     <MidSection>
                         <Heading data={this.state.data}/>
                         <pre>{JSON.stringify(this.state.data.get('result').toJS(), null, 2)}</pre>

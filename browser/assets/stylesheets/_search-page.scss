@@ -1,0 +1,66 @@
+.search-result-page {
+  form {
+    margin-top: 0;
+  }
+
+  .search-result-list {
+    margin-top: 1rem;
+  }
+
+  .card.search-result {
+    padding: 0;
+    border: none;
+
+    .row.layout {
+      margin: 0;
+      padding: 0;
+
+      .col {
+        padding: 0;
+        margin: 0;
+      }
+
+      .details {
+        //padding: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+
+        th {
+          padding: 5px;
+        }
+
+        td {
+          padding: 5px;
+
+          &.name {
+            font-size: 0.9em;
+            width: 120px;
+            color: $primary-color-dark;
+          }
+
+          &.value {
+            border-left: 1px solid #d0d0d0;
+          }
+
+          img {
+            display: inline-block;
+            height: 200px;
+            width: auto;
+          }
+        }
+      }
+    }
+  }
+
+  .card.search-result + .card.search-result {
+    margin-top: 2rem;
+  }
+
+  .result-group + .result-group {
+    margin-top: 4rem;
+  }
+
+  .search-result-navigation {
+    margin-top: 2rem;
+  }
+}

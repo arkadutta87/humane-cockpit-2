@@ -1,22 +1,25 @@
 import _ from 'lodash';
 import Immutable from 'immutable';
-import classnames from 'classnames';
 import React from 'react';
 import QueryString from 'qs';
-import {VelocityTransitionGroup} from 'velocity-react';
 
 import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxControllerMixin';
 
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
+import LeftSection from 'reactjs-web-boilerplate/lib/app/components/LeftSection';
+import RightSection from 'reactjs-web-boilerplate/lib/app/components/RightSection';
 
+import {default as SearchInputStore} from './SearchInputStore';
 import {default as AutocompleteStore} from './AutocompleteStore';
 
-const StoreKey = 'AutocompleteStore';
+const AutocompleteStoreKey = 'AutocompleteStore';
+
+const SearchInputStoreKey = 'SearchInputStore';
 
 //<a target="_blank" style={{marginLeft: 15}} href={`/analyze/explain/autocomplete/${suggestion.get('_id')}`}>Explain</a>
 
-const suggestionValue = (data) => {
+const suggestionValue = (data, appProperties) => {
     const suggestion = data.suggestion;
 
     const properties = data.properties;
@@ -42,14 +45,15 @@ const suggestionValue = (data) => {
         let queryParams = {
             text: suggestion.get(valueField),
             unicodeText: suggestion.get(unicodeValueField),
-            lang: suggestion.get('lang'),
+
+            //lang: suggestion.get('lang'),
             filter: data.filter.toJS(),
             originalInput: data.inputText
         };
 
         queryParams = _.assign(queryParams, {mode: searchMode, type: searchType});
 
-        url = `/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
+        url = `${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
     }
 
     let title = null;
@@ -66,10 +70,16 @@ const suggestionValue = (data) => {
         statValues.push(<td key={key}>{suggestion.get(value)}</td>);
     }));
 
+    let weakSuggestionDisclaimer = null;
+    if (suggestion.get('_weakSuggestion')) {
+        weakSuggestionDisclaimer = <div style={{backgroundColor: 'yellow', textAlign: 'center'}}>This is a weak suggestion.</div>;
+    }
+
     return (<div className="suggestion-value">
         <div>
             {title}
-            <a target="_blank" style={{marginLeft: 30, fontSize: '0.8em'}} href={`/analyze/termVectors/${suggestion.get('_type')}/${suggestion.get('_id')}`}>Term Vectors</a>
+            <a target="_blank" style={{marginLeft: 30, fontSize: '0.8em'}}
+               href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/analyze/termVectors/${suggestion.get('_type')}/${suggestion.get('_id')}`}>Term Vectors</a>
         </div>
         <table className="bordered suggestion-stats">
             <thead>
@@ -87,23 +97,30 @@ const suggestionValue = (data) => {
             </tr>
             </tbody>
         </table>
+        {weakSuggestionDisclaimer}
     </div>);
 };
 
 const Suggestion = (props) => (<div className="suggestion card">
     <div className="card-body">
-        {suggestionValue(props.data)}
+        {suggestionValue(props.data, props.appProperties)}
     </div>
 </div>);
+
+Suggestion.propTypes = {
+    data: React.PropTypes.object.isRequired,
+    appProperties: React.PropTypes.object.isRequired
+};
 
 const SuggestionList = (props) => {
     if (!props.data) {
         return (<noscript/>);
     }
 
-    const text = props.data.get('text');
-    const suggestions = props.data.get('suggestions');
-    const filter = props.data.get('filter');
+    const text = props.data.text;
+    const filter = props.data.filter;
+    const suggestions = props.data.suggestionsData.get('suggestions');
+    const hideWeakSuggestions = props.data.suggestionsData.get('hideWeakSuggestions');
 
     if (!text || !suggestions) {
         return (<noscript/>);
@@ -118,7 +135,9 @@ const SuggestionList = (props) => {
 
             suggestionViews.push(<div className="section small" key={key}>
                 <div className="suggestion-section-heading"><strong>{name} suggestions: {results.count() || 0}</strong></div>
-                {results.map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, properties}} key={`${key}-${index}`}/>)}
+                {results.filter(suggestion => !hideWeakSuggestions || !suggestion.get('_weakSuggestion')).map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, properties}}
+                                                                                                                                                 appProperties={props.appProperties}
+                                                                                                                                                 key={`${key}-${index}`}/>)}
             </div>);
         }
     };
@@ -137,8 +156,8 @@ const SuggestionList = (props) => {
     }
 
     return (<div className="suggestions">
-        <div className="section small"><span>Showing auto completion suggestions for:</span> <span className="query">{text}</span> <span
-          className="time-taken">(Total Time: {props.data.get('totalTimeTaken')}ms, Service Time: {suggestions.get('serviceTimeTaken')}ms, Query Time: {suggestions.get('queryTimeTaken')}ms)</span>
+        <div className="section small time-taken right-align">
+            Total Time: {props.data.suggestionsData.get('totalTimeTaken')}ms, Service Time: {suggestions.get('serviceTimeTaken')}ms, Query Time: {suggestions.get('queryTimeTaken')}ms
         </div>
         {suggestionViews}
     </div>);
@@ -153,21 +172,18 @@ export default React.createClass({
     mixins: [FluxControllerMixin],
 
     getInitialState() {
-        this.getFluxController().createStore(AutocompleteStore, StoreKey);
-        this.registerStore(StoreKey);
+        const searchInputStore = this.searchInputStore = this.getFluxController().createStore(SearchInputStore, SearchInputStoreKey);
+        this.autocompleteResultStore = this.getFluxController().createStore(AutocompleteStore, AutocompleteStoreKey, searchInputStore);
+
+        this.registerStores({
+            [SearchInputStoreKey]: {dataKey: 'searchInputData'},
+            [AutocompleteStoreKey]: {dataKey: 'autocompleteResultData'}
+        });
 
         return {
-            data: this.getStoreData(StoreKey),
-            filterCollapsed: false
+            searchInputData: this.searchInputStore.data,
+            autocompleteResultData: this.autocompleteResultStore.data
         };
-    },
-
-    //componentDidMount() {
-    //    this.store().createSocket();
-    //},
-
-    store() {
-        return this.getStore(StoreKey);
     },
 
     topBar() {
@@ -176,42 +192,48 @@ export default React.createClass({
         </div>);
     },
 
-    handleTextChange(e) {
+    handleSearchTextChange(e) {
         const text = e.target.value;
-        this.store().setText(text);
+        this.searchInputStore.setSearchText(text);
     },
 
-    handleSearch(e) {
+    handleSearchInputEnter(e) {
         if (e.keyCode !== 13) {
             return;
         }
 
         const queryParams = {
-            text: this.state.data.get('text'),
-            filter: this.state.data.get('filter').toJS(),
+            text: this.state.searchInputData.get('text'),
+            filter: this.state.searchInputData.get('filter').toJS(),
             mode: 'organic'
         };
 
-        window.open(`/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`, '_blank');
+        const cockpitUrlPrefix = this.getAppProperties().get('cockpitUrlPrefix', '');
+
+        window.open(`${cockpitUrlPrefix}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`, '_blank');
     },
 
     handlePrimaryLanguageChange(e) {
         if (e.target.checked) {
-            this.store().setPrimaryLanguage(e.target.value);
+            this.searchInputStore.setPrimaryLanguage(e.target.value);
         }
     },
 
     handleSecondaryLanguageChange(e) {
         if (e.target.checked) {
-            this.store().addSecondaryLanguage(e.target.value);
+            this.searchInputStore.addSecondaryLanguage(e.target.value);
         } else {
-            this.store().removeSecondaryLanguage(e.target.value);
+            this.searchInputStore.removeSecondaryLanguage(e.target.value);
         }
     },
 
     handleSuggestionCountChange(e) {
         const count = e.target.value;
-        this.store().setSuggestionCount(count);
+        this.autocompleteResultStore.setSuggestionCount(count);
+    },
+
+    handleHideWeakSuggestionsChange(e) {
+        this.autocompleteResultStore.hideWeakSuggestions(e.target.checked);
     },
 
     handleFilterCollapsibleClick(e) {
@@ -239,8 +261,8 @@ export default React.createClass({
                     const langUnicode = lang.get('unicode');
 
                     const id = `radio${langKey}`;
-                    const checked = this.state.data.getIn(['filter', 'lang', 'primary']) === langCode;
-                    return (<li className="col s12 m8" key={id}>
+                    const checked = this.state.searchInputData.getIn(['filter', 'lang', 'primary']) === langCode;
+                    return (<li className="col s12" key={id}>
                         <input name="primaryLanguages" type="radio" id={id} value={langCode} onChange={this.handlePrimaryLanguageChange} checked={checked}/>
                         <label htmlFor={id}>{langKey} ({langUnicode})</label>
                     </li>);
@@ -267,9 +289,9 @@ export default React.createClass({
                     const langUnicode = lang.get('unicode');
 
                     const id = `checkbox${langKey}`;
-                    const disabled = this.state.data.getIn(['filter', 'lang', 'primary']) === langCode;
-                    const checked = !disabled && this.state.data.getIn(['filter', 'lang', 'secondary']).some((code) => code === langCode);
-                    return (<li className="col s12 m8" key={id}>
+                    const disabled = this.state.searchInputData.getIn(['filter', 'lang', 'primary']) === langCode;
+                    const checked = !disabled && this.state.searchInputData.getIn(['filter', 'lang', 'secondary']) && this.state.searchInputData.getIn(['filter', 'lang', 'secondary']).some((code) => code === langCode);
+                    return (<li className="col s12" key={id}>
                         <input type="checkbox" id={id} value={langCode} onChange={this.handleSecondaryLanguageChange} disabled={disabled} checked={checked}/>
                         <label htmlFor={id}>{langKey} ({langUnicode})</label>
                     </li>);
@@ -279,48 +301,68 @@ export default React.createClass({
     },
 
     renderFilterInputBody() {
-        const suggestionCount = this.state.data.get('count');
-
         return (<div className="card-body">
             {this.renderPrimaryLanguages()}
             {this.renderSecondaryLanguages()}
-
-            <div className="range-field-section">
-                <strong className="range-field-heading" htmlFor="range">Suggestions count: </strong>
-                <div className="range-field">
-                    <input type="range"
-                           id="range"
-                           value={suggestionCount}
-                           min="1"
-                           max="15"
-                           step="1"
-                           onChange={this.handleSuggestionCountChange}
-                    />
-                </div>
-                <output className="range-field-output chip" htmlFor="id">{suggestionCount}</output>
-            </div>
         </div>);
     },
 
-    renderFilterInput() {
+    renderFilterInputs() {
+        const primaryLanguages = this.getAppProperties().get('primaryLanguages');
+        const secondaryLanguages = this.getAppProperties().get('secondaryLanguages');
+
+        if (!primaryLanguages && !secondaryLanguages) {
+            return <noscript/>;
+        }
+
         return (<div className="card">
               <div className="card-header">
-                  <a className="collapsible" href="" onClick={this.handleFilterCollapsibleClick}>
-                      Set filters <i className={classnames('fa', 'fa-chevron-up', (this.state.filterCollapsed ? 'down' : 'up'))}/>
-                  </a>
+                  <h6 className="center-align">Filter</h6>
               </div>
-              <VelocityTransitionGroup component="div" enter="slideDown" leave="slideUp">
-                  {this.state.filterCollapsed ? null : this.renderFilterInputBody()}
-              </VelocityTransitionGroup>
+              {this.renderFilterInputBody()}
           </div>
         );
     },
 
-    renderForm() {
-        const text = this.state.data.get('text');
+    renderConfigInputs() {
+        const suggestionCount = this.state.autocompleteResultData.get('count');
+
+        const hideWeakSuggestions = this.state.autocompleteResultData.get('hideWeakSuggestions');
+
+        return (<div className="card">
+            <div className="card-header">
+                <h6 className="center-align">Configure</h6>
+            </div>
+            <div className="card-body">
+                <ul className="radio-group row">
+                    <li className="col s24">
+                        <input type="checkbox" id="hideWeakSuggestionsInput" value={hideWeakSuggestions} checked={hideWeakSuggestions} onChange={this.handleHideWeakSuggestionsChange}/>
+                        <label htmlFor="hideWeakSuggestionsInput">Hide Weak Suggestions</label>
+                    </li>
+                </ul>
+                <div className="range-field-section">
+                    <strong className="range-field-heading" htmlFor="range">Suggestions count: </strong>
+                    <div className="range-field">
+                        <input type="range"
+                               id="range"
+                               value={suggestionCount}
+                               min="1"
+                               max="15"
+                               step="1"
+                               onChange={this.handleSuggestionCountChange}
+                        />
+                    </div>
+                    <output className="range-field-output chip" htmlFor="id">{suggestionCount}</output>
+                </div>
+            </div>
+        </div>);
+    },
+
+    renderSearchForm() {
+        const text = this.state.searchInputData.get('text');
 
         return (<form role="form" className="autocomplete-form" action="javascript:void(0);">
-            {this.renderFilterInput()}
+
             <div className="input-field">
                 <input type="text"
                        className="validate"
@@ -328,13 +370,15 @@ export default React.createClass({
                        autoComplete="off"
                        placeholder="Your Search Query"
                        value={text}
-                       onChange={this.handleTextChange}
-                       onKeyUp={this.handleSearch}/>
+                       onChange={this.handleSearchTextChange}
+                       onKeyUp={this.handleSearchInputEnter}/>
             </div>
         </form>);
     },
 
     render() {
+        const text = this.state.searchInputData.get('text');
+
         return (<div className="page-content cockpit-page autocomplete-page">
             <header>
                 <NavBarContainer>
@@ -343,12 +387,20 @@ export default React.createClass({
             </header>
             <main>
                 <div className="row">
+                    <LeftSection>
+                        {this.renderFilterInputs()}
+                    </LeftSection>
                     <MidSection>
                         <div>
-                            {this.renderForm()}
+                            {this.renderSearchForm()}
                         </div>
-                        <SuggestionList data={this.state.data} appProperties={this.getAppProperties()}/>
+                        <SuggestionList
+                          data={{suggestionsData: this.state.autocompleteResultData, text, filter: this.state.searchInputData.get('filter')}}
+                          appProperties={this.getAppProperties()}/>
                     </MidSection>
+                    <RightSection>
+                        {this.renderConfigInputs()}
+                    </RightSection>
                 </div>
             </main>
         </div>);

@@ -10,34 +10,39 @@
     "prepublish": "npm run compile"
   },
   "author": "Shailendra Sharma",
-  "license": "360fy Proprietary",
+  "license": "MIT",
   "dependencies": {
     "bluebird": "^3.3.4",
     "classnames": "^2.2.3",
+    "eslint-config-360fy": "https://private-npm-releases.s3.amazonaws.com/eslint-config-360fy-1.0.1.tgz",
     "events": "^1.1.0",
     "immutable": "^3.7.6",
-    "js-yaml": "^3.5.3",
+    "js-yaml": "^3.5.5",
     "lodash": "^4.6.1",
     "moment": "^2.12.0",
     "qs": "^6.1.0",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "react-router": "^2.0.0",
+    "react-router": "^2.0.1",
     "reactjs-web-boilerplate": "https://private-npm-releases.s3.amazonaws.com/reactjs-web-boilerplate-1.0.6.tgz",
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
-    "babel-core": "^6.6.5",
-    "babel-preset-node5": "^10.8.0",
+    "babel-core": "^6.7.2",
+    "babel-plugin-transform-runtime": "^6.6.0",
+    "babel-preset-node5": "^11.0.0",
     "babel-preset-react": "^6.5.0",
-    "eslint": "^2.3.0",
+    "eslint": "^2.4.0",
     "eslint-config-360fy": "https://private-npm-releases.s3.amazonaws.com/eslint-config-360fy-1.0.1.tgz",
-    "eslint-plugin-react": "^4.2.0"
+    "eslint-plugin-react": "^4.2.3"
   },
   "eslintConfig": {
     "extends": "360fy"
   },
   "babel": {
+    "plugins": [
+      "transform-runtime"
+    ],
     "presets": [
       "node5",
       "react"
