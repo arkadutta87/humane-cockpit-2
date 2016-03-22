@@ -22,7 +22,7 @@
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-router": "^2.0.1",
-    "reactjs-web-boilerplate": "^1.0.6",
+    "reactjs-web-boilerplate": "^1.1.0",
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
@@ -31,7 +31,7 @@
     "babel-preset-node5": "^11.0.0",
     "babel-preset-react": "^6.5.0",
     "eslint": "^2.4.0",
-    "eslint-config-360fy": "^1.0.1",
+    "eslint-config-360fy": "^1.1.0",
     "eslint-plugin-react": "^4.2.3"
   },
   "eslintConfig": {
