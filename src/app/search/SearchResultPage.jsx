@@ -243,7 +243,7 @@ const SearchResult = (props) => {
         </div>);
     }
 
-    return (<div className={classnames('card', 'search-result', result.get('id'))}>
+    return (<div className={classnames('card', 'search-result', result.get('_id'))}>
         <div className="card-body">
             {weakResultDisclaimer}
             <div className="row layout">
@@ -252,11 +252,11 @@ const SearchResult = (props) => {
                     <tr>
                         <td className="name">Id</td>
                         <td className="value">
-                            <span>{result.get('id')}</span>
+                            <span>{result.get('_id')}</span>
                             <a target="_blank" style={{marginLeft: 15}}
                                href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/analyze/explain/search/${result.get('_id')}${location.search}`}>Explain</a>
                             <a target="_blank" style={{marginLeft: 15}}
-                               href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/analyze/termVectors/${result.get('_type')}/${result.get('id')}`}>Term Vectors</a>
+                               href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/analyze/termVectors/${result.get('_type')}/${result.get('_id')}`}>Term Vectors</a>
                         </td>
                     </tr>
                     <tr>
@@ -483,7 +483,7 @@ export default React.createClass({
     },
 
     renderSearchResult(result, appProperties, hideWeakResults) {
-        return (<SearchResult data={{result, location: this.props.location, hideWeakResults}} appProperties={appProperties} key={result.get('id')}/>);
+        return (<SearchResult data={{result, location: this.props.location, hideWeakResults}} appProperties={appProperties} key={result.get('_id')}/>);
     },
 
     renderSearchResults(results, appProperties) {
