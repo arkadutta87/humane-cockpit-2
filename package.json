@@ -1,6 +1,6 @@
 {
   "name": "humane-cockpit",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Cockpit module for Humane Search",
   "repository": "git@github.com:360fy/humane-cockpit.git",
   "scripts": {
