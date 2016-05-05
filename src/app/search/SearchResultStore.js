@@ -67,13 +67,13 @@ export default class extends FluxStore {
                   if (response.entity.multi) {
                       _(response.entity.results).values().forEach(resultGroup => {
                           _.forEach(resultGroup.results, result => {
-                              result._relevancy = result._score / (result.weight || 1.0);
+                              result._relevancy = result._score / (result._weight || 1.0);
                               relevancyScores.push(result._relevancy);
                           });
                       });
                   } else {
                       _.forEach(response.entity.results, result => {
-                          result._relevancy = result._score / (result.weight || 1.0);
+                          result._relevancy = result._score / (result._weight || 1.0);
                           relevancyScores.push(result._relevancy);
                       });
                   }

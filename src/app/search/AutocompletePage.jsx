@@ -33,8 +33,8 @@ const suggestionValue = (data, appProperties) => {
     let display = properties && _.isFunction(properties.get('display')) && properties.get('display')(suggestion);
     if (!display) {
         const displayField = properties && properties.get('displayField') || 'unicodeValue';
-        if (suggestion.get('lang')) {
-            display = `${suggestion.get(displayField)} (${suggestion.get('lang')})`;
+        if (suggestion.get('_lang')) {
+            display = `${suggestion.get(displayField)} (${suggestion.get('_lang')})`;
         } else {
             display = suggestion.get(displayField);
         }
@@ -46,7 +46,7 @@ const suggestionValue = (data, appProperties) => {
             text: suggestion.get(valueField),
             unicodeText: suggestion.get(unicodeValueField),
 
-            //lang: suggestion.get('lang'),
+            //lang: suggestion.get('_lang'),
             filter: data.filter.toJS(),
             originalInput: data.inputText
         };
@@ -92,7 +92,7 @@ const suggestionValue = (data, appProperties) => {
             <tbody>
             <tr>
                 <td>{suggestion.get('_score').toFixed(5)}</td>
-                <td>{suggestion.get('weight')}</td>
+                <td>{suggestion.get('_weight')}</td>
                 {statValues}
             </tr>
             </tbody>

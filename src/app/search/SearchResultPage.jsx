@@ -29,7 +29,7 @@ const buildSuggestionView = (suggestion, filter, text, appProperties) => {
     const searchMode = properties && properties.get('searchMode');
     const searchType = properties && properties.get('searchType');
 
-    const lang = suggestion.get('lang');
+    const lang = suggestion.get('_lang');
 
     let displayKey = null;
     let unicodeKey = null;
@@ -59,7 +59,7 @@ const buildSuggestionView = (suggestion, filter, text, appProperties) => {
             text: suggestion.get(valueField),
             unicodeText: suggestion.get(unicodeValueField),
 
-            //lang: suggestion.get('lang'),
+            //lang: suggestion.get('_lang'),
             filter: filter.toJS(),
             originalInput: text
         };
@@ -273,7 +273,7 @@ const SearchResult = (props) => {
                                 <tbody>
                                 <tr>
                                     <td>{result.get('_score').toFixed(5)}</td>
-                                    <td>{result.get('weight')}</td>
+                                    <td>{result.get('_weight')}</td>
                                     {statValues}
                                 </tr>
                                 </tbody>
