@@ -33,6 +33,49 @@ export default class extends FluxStore {
         return this.updateData(this.data.set('suggestions', null).set('totalTimeTaken', null));
     }
 
+    markWeakResults(results, name) {
+        if (!this.relevancyScores) {
+            this.relevancyScores = {};
+        }
+
+        if (!this.relevancyScores[name]) {
+            this.relevancyScores[name] = [];
+        }
+
+        const relevancyScores = this.relevancyScores[name];
+
+        _.forEach(results, result => {
+            result._relevancy = result._score / (result._weight || 1.0);
+            relevancyScores.push(result._relevancy);
+        });
+
+        // sort relevancy scores
+        relevancyScores.sort((scoreA, scoreB) => scoreB - scoreA);
+
+        // iterate over the relevancy scores to find point at which score drops suddenly.
+        let previousRelevancy = 0;
+        let deflectionScore = 0;
+        _.forEach(relevancyScores, score => {
+            if (previousRelevancy && score < 0.5 * previousRelevancy) {
+                deflectionScore = previousRelevancy;
+                return false;
+            }
+
+            previousRelevancy = score;
+
+            return true;
+        });
+
+        _.forEach(results, result => {
+            if (result._relevancy >= deflectionScore) {
+                return true;
+            }
+
+            result._weakResult = true;
+            return true;
+        });
+    }
+
     fetchSuggestions() {
         const text = this.searchInputStore.data.get('text');
         if (!text) {
@@ -50,64 +93,13 @@ export default class extends FluxStore {
           .then((result) => {
               const totalTimeTaken = (Date.now() - requestTime);
               if (result && result.entity) {
-                  const relevancyScores = [];
-
-                  // calculate relevancy scores
                   if (result.entity.multi) {
                       _(result.entity.results).values().forEach(suggestionGroup => {
-                          _.forEach(suggestionGroup.results, suggestion => {
-                              suggestion._relevancy = suggestion._score / (suggestion._weight || 1.0);
-                              relevancyScores.push(suggestion._relevancy);
-                          });
-                      });
-                  } else {
-                      _.forEach(result.entity.results, suggestion => {
-                          suggestion._relevancy = suggestion._score / (suggestion._weight || 1.0);
-                          relevancyScores.push(suggestion._relevancy);
-                      });
-                  }
-
-                  // sort relevancy scores
-                  relevancyScores.sort((scoreA, scoreB) => scoreB - scoreA);
-
-                  console.log('Sorted Relevancy Scores: ', relevancyScores);
-
-                  // iterate over the relevancy scores to find point at which score drops suddenly.
-                  let previousRelevancy = 0;
-                  let deflectionScore = 0;
-                  _.forEach(relevancyScores, score => {
-                      if (previousRelevancy && score < 0.5 * previousRelevancy) {
-                          deflectionScore = previousRelevancy;
-                          return false;
-                      }
-
-                      previousRelevancy = score;
-
-                      return true;
-                  });
-
-                  console.log('Deflection Score: ', deflectionScore);
-
-                  if (result.entity.multi) {
-                      _(result.entity.results).values().forEach(suggestionGroup => {
-                          _.forEach(suggestionGroup.results, suggestion => {
-                              if (suggestion._relevancy >= deflectionScore) {
-                                  return true;
-                              }
-
-                              suggestion._weakSuggestion = true;
-                              return true;
-                          });
-                      });
-                  } else {
-                      _.forEach(result.entity.results, suggestion => {
-                          if (suggestion._relevancy >= deflectionScore) {
-                              return true;
-                          }
-
-                          suggestion._weakSuggestion = true;
+                          this.markWeakResults(suggestionGroup.results, suggestionGroup.name);
                           return true;
                       });
+                  } else {
+                      this.markWeakResults(result.entity.results, result.entity.name);
                   }
 
                   return this.updateData(this.data.set('suggestions', Immutable.fromJS(result.entity)).set('totalTimeTaken', totalTimeTaken));

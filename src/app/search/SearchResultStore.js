@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import Immutable from 'immutable';
-
 import FluxStore from 'reactjs-web-boilerplate/lib/app/flux/FluxStore';
-
 import {EVENT_SEARCH_PARAMS_UPDATE, EVENT_FILTER_UPDATE, EVENT_PAGE_UPDATE} from './SearchInputStore';
 
 const PageSize = 5;
@@ -27,6 +25,49 @@ export default class extends FluxStore {
         this.updateData(this.data.set('hideWeakResults', value));
 
         return this.fetchSearchResults();
+    }
+
+    markWeakResults(results, name) {
+        if (!this.relevancyScores) {
+            this.relevancyScores = {};
+        }
+        
+        if (!this.relevancyScores[name]) {
+            this.relevancyScores[name] = [];
+        }
+        
+        const relevancyScores = this.relevancyScores[name];
+
+        _.forEach(results, result => {
+            result._relevancy = result._score / (result._weight || 1.0);
+            relevancyScores.push(result._relevancy);
+        });
+
+        // sort relevancy scores
+        relevancyScores.sort((scoreA, scoreB) => scoreB - scoreA);
+
+        // iterate over the relevancy scores to find point at which score drops suddenly.
+        let previousRelevancy = 0;
+        let deflectionScore = 0;
+        _.forEach(relevancyScores, score => {
+            if (previousRelevancy && score < 0.5 * previousRelevancy) {
+                deflectionScore = previousRelevancy;
+                return false;
+            }
+
+            previousRelevancy = score;
+
+            return true;
+        });
+
+        _.forEach(results, result => {
+            if (result._relevancy >= deflectionScore) {
+                return true;
+            }
+
+            result._weakResult = true;
+            return true;
+        });
     }
 
     fetchSearchResults() {
@@ -54,67 +95,19 @@ export default class extends FluxStore {
               let data = this.data;
 
               if (page === 0) {
-                  this.relevancyScores = [];
                   data = data.set('results', null);
               }
 
               if (response && response.entity) {
                   const multi = data.get('multi') || response.entity.multi;
 
-                  const relevancyScores = this.relevancyScores;
-
-                  // calculate relevancy scores
                   if (response.entity.multi) {
                       _(response.entity.results).values().forEach(resultGroup => {
-                          _.forEach(resultGroup.results, result => {
-                              result._relevancy = result._score / (result._weight || 1.0);
-                              relevancyScores.push(result._relevancy);
-                          });
-                      });
-                  } else {
-                      _.forEach(response.entity.results, result => {
-                          result._relevancy = result._score / (result._weight || 1.0);
-                          relevancyScores.push(result._relevancy);
-                      });
-                  }
-
-                  // sort relevancy scores
-                  relevancyScores.sort((scoreA, scoreB) => scoreB - scoreA);
-
-                  // iterate over the relevancy scores to find point at which score drops suddenly.
-                  let previousRelevancy = 0;
-                  let deflectionScore = 0;
-                  _.forEach(relevancyScores, score => {
-                      if (previousRelevancy && score < 0.5 * previousRelevancy) {
-                          deflectionScore = previousRelevancy;
-                          return false;
-                      }
-
-                      previousRelevancy = score;
-
-                      return true;
-                  });
-
-                  if (response.entity.multi) {
-                      _(response.entity.results).values().forEach(resultGroup => {
-                          _.forEach(resultGroup.results, result => {
-                              if (result._relevancy >= deflectionScore) {
-                                  return true;
-                              }
-
-                              result._weakResult = true;
-                              return true;
-                          });
-                      });
-                  } else {
-                      _.forEach(response.entity.results, result => {
-                          if (result._relevancy >= deflectionScore) {
-                              return true;
-                          }
-
-                          result._weakResult = true;
+                          this.markWeakResults(resultGroup.results, resultGroup.name);
                           return true;
                       });
+                  } else {
+                      this.markWeakResults(response.entity.results, response.entity.name);
                   }
 
                   if (multi) {
