@@ -90,19 +90,21 @@ export default class extends FluxStore {
         //this.socket.emit('autocomplete', {request: {text, count, filter, requestTime}});
 
         return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/autocomplete`, {text, count, filter, requestTime})
-          .then((result) => {
+          .then((response) => {
+              this.relevancyScores = null;
+              
               const totalTimeTaken = (Date.now() - requestTime);
-              if (result && result.entity) {
-                  if (result.entity.multi) {
-                      _(result.entity.results).values().forEach(suggestionGroup => {
+              if (response && response.entity) {
+                  if (response.entity.multi) {
+                      _(response.entity.results).values().forEach(suggestionGroup => {
                           this.markWeakResults(suggestionGroup.results, suggestionGroup.name);
                           return true;
                       });
                   } else {
-                      this.markWeakResults(result.entity.results, result.entity.name);
+                      this.markWeakResults(response.entity.results, response.entity.name);
                   }
 
-                  return this.updateData(this.data.set('suggestions', Immutable.fromJS(result.entity)).set('totalTimeTaken', totalTimeTaken));
+                  return this.updateData(this.data.set('suggestions', Immutable.fromJS(response.entity)).set('totalTimeTaken', totalTimeTaken));
               }
 
               return this.noSuggestions();

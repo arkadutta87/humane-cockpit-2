@@ -71,7 +71,7 @@ const suggestionValue = (data, appProperties) => {
     }));
 
     let weakSuggestionDisclaimer = null;
-    if (suggestion.get('_weakSuggestion')) {
+    if (suggestion.get('_weakResult')) {
         weakSuggestionDisclaimer = <div style={{backgroundColor: 'yellow', textAlign: 'center'}}>This is a weak suggestion.</div>;
     }
 
@@ -135,7 +135,7 @@ const SuggestionList = (props) => {
 
             suggestionViews.push(<div className="section small" key={key}>
                 <div className="suggestion-section-heading"><strong>{name} suggestions: {results.count() || 0}</strong></div>
-                {results.filter(suggestion => !hideWeakSuggestions || !suggestion.get('_weakSuggestion')).map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, properties}}
+                {results.filter(suggestion => !hideWeakSuggestions || !suggestion.get('_weakResult')).map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, properties}}
                                                                                                                                                  appProperties={props.appProperties}
                                                                                                                                                  key={`${key}-${index}`}/>)}
             </div>);

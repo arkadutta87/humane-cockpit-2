@@ -95,6 +95,7 @@ export default class extends FluxStore {
               let data = this.data;
 
               if (page === 0) {
+                  this.relevancyScores = null;
                   data = data.set('results', null);
               }
 
