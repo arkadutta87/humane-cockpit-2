@@ -78,7 +78,7 @@ export default class extends FluxStore {
 
     fetchSuggestions() {
         const text = this.searchInputStore.data.get('text');
-        if (!text) {
+        if (!text || text.length < 2) {
             return this.noSuggestions();
         }
 
