@@ -4,9 +4,19 @@
     font-weight: 700;
   }
 
+  .suggestions-section-heading {
+    margin-bottom: 0.5rem;
+    color: $primary-color;
+    font-weight: bold;
+    font-size: 1.4em;
+    text-align: center;
+  }
+
   .suggestion-section-heading {
     margin-bottom: 0.5rem;
     color: $primary-color;
+    font-weight: bold;
+    font-size: 1.2em;
 
     &:last-child {
       margin-bottom: 0;

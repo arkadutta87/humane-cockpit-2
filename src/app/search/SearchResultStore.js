@@ -76,6 +76,7 @@ export default class extends FluxStore {
             return null;
         }
 
+        const fuzzySearch = this.searchInputStore.data.get('fuzzySearch');
         const filter = this.searchInputStore.data.get('filter') && this.searchInputStore.data.get('filter').toJS();
         const count = this.data.get('count');
         const page = this.searchInputStore.data.get('page');
@@ -88,7 +89,7 @@ export default class extends FluxStore {
 
         const requestTime = Date.now();
 
-        return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/search`, {count, page, text, unicodeText, originalInput, /*lang,*/ filter, mode, type})
+        return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/search`, {count, page, text, unicodeText, originalInput, /*lang,*/ filter, mode, type, fuzzySearch})
           .then((response) => {
               const totalTimeTaken = (Date.now() - requestTime);
 
@@ -147,6 +148,7 @@ export default class extends FluxStore {
                       });
 
                       data = data.set('results', existingResults)
+                        .set('facets', Immutable.fromJS(response.entity.facets || null))
                         .set('page', page)
                         .set('hasMoreResults', response.entity.totalResults > (page + 1) * count)
                         .set('name', response.entity.name)

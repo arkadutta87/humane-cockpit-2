@@ -4,152 +4,22 @@ import Immutable from 'immutable';
 import moment from 'moment';
 import classnames from 'classnames';
 import QueryString from 'qs';
-
 import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxControllerMixin';
-
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
 import LeftSection from 'reactjs-web-boilerplate/lib/app/components/LeftSection';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
 import RightSection from 'reactjs-web-boilerplate/lib/app/components/RightSection';
-
 import {default as SearchInputStore} from './SearchInputStore';
 import {default as SearchResultStore} from './SearchResultStore';
 import {default as SuggestedQueriesStore} from './SuggestedQueriesStore';
+import {default as DidYouMeanStore} from './DidYouMeanStore';
+import {RelatedSearchesList} from './components/RelatedSearchesList';
+import {DidYouMeanList} from './components/DidYouMeanList';
 
 const SearchInputStoreKey = 'SearchInputStore';
 const SearchResultStoreKey = 'SearchResultStore';
 const SuggestedQueriesStoreKey = 'SuggestedQueriesStore';
-
-const buildSuggestionView = (suggestion, filter, text, appProperties) => {
-    const name = suggestion.get('_name');
-    const properties = appProperties.getIn(['autocomplete', name]);
-    const valueField = properties && properties.get('valueField') || 'value';
-    const unicodeValueField = properties && properties.get('unicodeValueField') || 'unicodeValue';
-
-    const searchMode = properties && properties.get('searchMode');
-    const searchType = properties && properties.get('searchType');
-
-    const lang = suggestion.get('_lang');
-
-    let displayKey = null;
-    let unicodeKey = null;
-    let enKey = null;
-
-    // to show name here
-    let display = properties && _.isFunction(properties.get('display')) && properties.get('display')(suggestion);
-    if (!display) {
-        const displayField = properties && properties.get('displayField') || unicodeValueField;
-
-        const displayText = suggestion.get(displayField);
-        displayKey = _.lowerCase(displayText);
-
-        unicodeKey = _.lowerCase(suggestion.get(unicodeValueField));
-        enKey = _.lowerCase(suggestion.get(valueField));
-
-        if (lang) {
-            display = `${displayText} (${lang})`;
-        } else {
-            display = displayText;
-        }
-    }
-
-    let url = null;
-    if (searchMode) {
-        let queryParams = {
-            text: suggestion.get(valueField),
-            unicodeText: suggestion.get(unicodeValueField),
-
-            //lang: suggestion.get('_lang'),
-            filter: filter.toJS(),
-            originalInput: text
-        };
-
-        queryParams = _.assign(queryParams, {mode: searchMode, type: searchType});
-
-        url = `${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
-    }
-
-    return {id: suggestion.get('_id'), display, url, name, unicodeKey, enKey, displayKey};
-};
-
-const SuggestionList = (props) => {
-    if (!props.data) {
-        return <noscript/>;
-    }
-
-    const text = props.data.text;
-    const filter = props.data.filter;
-    const suggestions = props.data.suggestionsData.get('suggestions');
-
-    if (!text || !suggestions) {
-        return <noscript/>;
-    }
-
-    const buildSuggestionViews = (results) => {
-        if (results.count() > 0) {
-            const uniqueSuggestions = {[_.lowerCase(text)]: true};
-
-            return results
-              .filter(suggestion => !suggestion.get('_weakSuggestion'))
-              .map(suggestion => buildSuggestionView(suggestion, filter, text, props.appProperties))
-              .filter(response => {
-                  if (uniqueSuggestions[response.enKey]
-                    || uniqueSuggestions[response.displayKey]
-                    || uniqueSuggestions[response.unicodeKey]) {
-                      return false;
-                  }
-
-                  uniqueSuggestions[response.enKey] = true;
-                  uniqueSuggestions[response.displayKey] = true;
-                  uniqueSuggestions[response.unicodeKey] = true;
-
-                  return true;
-              })
-              .map(response => {
-                  let title = null;
-                  if (response.url) {
-                      title = <a href={response.url}>{response.display}</a>;
-                  } else {
-                      title = <span>{response.display}</span>;
-                  }
-
-                  return (<div className="suggestion card" key={response.id}>
-                      <div className="card-body">
-                          <div className="suggestion-title">
-                              {title}
-                          </div>
-                          <div className="suggestion-name right-align" style={{fontSize: '0.8rem'}}>
-                              {response.name}
-                          </div>
-                      </div>
-                  </div>);
-              });
-        }
-
-        return null;
-    };
-
-    const results = suggestions.get('results');
-
-    const suggestionsView = buildSuggestionViews(results);
-    if (!suggestionsView || suggestionsView.count() === 0) {
-        return <noscript/>;
-    }
-
-    return (<div className="card">
-        <div className="card-header">
-            <h6 className="center-align">Related Searches</h6>
-        </div>
-        <div className="card-body suggestions">
-            {suggestionsView}
-        </div>
-    </div>);
-};
-
-SuggestionList.propTypes = {
-    data: React.PropTypes.object.isRequired,
-    appProperties: React.PropTypes.object.isRequired
-};
+const DidYouMeanStoreKey = 'DidYouMeanStore';
 
 const SearchResult = (props) => {
     const result = props.data.result;
@@ -304,17 +174,20 @@ export default React.createClass({
         const searchInputStore = this.searchInputStore = this.getFluxController().createStore(SearchInputStore, SearchInputStoreKey);
         this.searchResultStore = this.getFluxController().createStore(SearchResultStore, SearchResultStoreKey, searchInputStore);
         this.suggestedQueriesStore = this.getFluxController().createStore(SuggestedQueriesStore, SuggestedQueriesStoreKey, searchInputStore);
+        this.didYouMeanResultStore = this.getFluxController().createStore(DidYouMeanStore, DidYouMeanStoreKey, searchInputStore);
 
         this.registerStores({
             [SearchInputStoreKey]: {dataKey: 'searchInputData'},
             [SearchResultStoreKey]: {dataKey: 'searchResultData'},
-            [SuggestedQueriesStoreKey]: {dataKey: 'suggestedQueriesData'}
+            [SuggestedQueriesStoreKey]: {dataKey: 'suggestedQueriesData'},
+            [DidYouMeanStoreKey]: {dataKey: 'didYouMeanResultData'}
         });
 
         return {
             searchInputData: this.searchInputStore.data,
             searchResultData: this.searchResultStore.data,
-            suggestedQueriesData: this.suggestedQueriesStore.data
+            suggestedQueriesData: this.suggestedQueriesStore.data,
+            didYouMeanResultData: this.didYouMeanResultStore.data
         };
     },
 
@@ -364,8 +237,12 @@ export default React.createClass({
         }
     },
 
-    handleHideWeakResultsChange(e) {
-        this.searchResultStore.hideWeakResults(e.target.checked);
+    handleWeakResultsToggle(e) {
+        this.searchInputStore.toggleWeakResults(e.target.checked);
+    },
+
+    handleFuzzySearchToggle(e) {
+        this.searchInputStore.toggleFuzzySearch(e.target.checked);
     },
 
     renderPrimaryLanguages() {
@@ -426,6 +303,44 @@ export default React.createClass({
         </div>);
     },
 
+    renderFacets() {
+        const facets = this.state.searchResultData.get('facets');
+
+        if (facets) {
+            const facetViews = facets.entrySeq().map(entry => {
+                const facetName = entry[0];
+
+                const facetValueViews = entry[1].map(value => {
+                    const key = value.get('key');
+                    const count = value.get('count');
+
+                    return (<li className="col s12" key={key} disabled="true">
+                        <input type="checkbox" id={key} value={key}/>
+                        <label htmlFor={key}>{key} ({count})</label>
+                    </li>);
+                });
+
+                return (<div className="card">
+                    <div className="card-header">
+                        <h6 className="center-align">{facetName}</h6>
+                    </div>
+                    <div className="card-body">
+                        <ul className="radio-group row">
+                            {facetValueViews}
+                        </ul>
+                    </div>
+                </div>);
+            });
+
+            return (<div>
+                <h5 className="center-align">Facets</h5>
+                {facetViews}
+            </div>);
+        }
+
+        return <noscript/>;
+    },
+
     renderFilterInputBody() {
         const primaryLanguageFilter = this.renderPrimaryLanguages();
         const secondaryLanguageFilter = this.renderSecondaryLanguages();
@@ -461,7 +376,7 @@ export default React.createClass({
         const appProperties = this.getAppProperties();
         const suggestionsData = this.state.suggestedQueriesData;
 
-        return (<SuggestionList data={{suggestionsData, text, filter}} appProperties={appProperties}/>);
+        return (<RelatedSearchesList data={{suggestionsData, text, filter}} appProperties={appProperties}/>);
     },
 
     renderSearchForm() {
@@ -482,18 +397,43 @@ export default React.createClass({
         </form>);
     },
 
-    renderSearchResult(result, appProperties, hideWeakResults) {
-        return (<SearchResult data={{result, location: this.props.location, hideWeakResults}} appProperties={appProperties} key={result.get('_id')}/>);
+    renderSearchResult(result, appProperties, weakResults) {
+        return (<SearchResult data={{result, location: this.props.location, weakResults}} appProperties={appProperties} key={result.get('_id')}/>);
     },
 
     renderSearchResults(results, appProperties) {
-        const hideWeakResults = this.state.searchResultData.get('hideWeakResults');
+        const weakResults = this.state.searchInputData.get('weakResults');
 
-        return results./*filter(result => !hideWeakResults || !result.get('_weakResult')).*/map(result => this.renderSearchResult(result, appProperties, hideWeakResults));
+        return results.filter(result => weakResults || !result.get('_weakResult')).map(result => this.renderSearchResult(result, appProperties, weakResults));
+    },
+
+    renderConfigInputs() {
+        const weakResults = this.state.searchInputData.get('weakResults');
+        const fuzzySearch = this.state.searchInputData.get('fuzzySearch');
+
+        return (<div className="card">
+            <div className="card-header">
+                <h6 className="center-align">Configure</h6>
+            </div>
+            <div className="card-body">
+                <ul className="radio-group row">
+                    <li className="col s24">
+                        <input type="checkbox" id="toggleWeakResultsInput" value={weakResults} checked={weakResults} onChange={this.handleWeakResultsToggle}/>
+                        <label htmlFor="toggleWeakResultsInput">Weak Results</label>
+                    </li>
+                    <li className="col s24">
+                        <input type="checkbox" id="toggleFuzzyInput" value={fuzzySearch} checked={fuzzySearch} onChange={this.handleFuzzySearchToggle}/>
+                        <label htmlFor="toggleFuzzyInput">Fuzzy Search</label>
+                    </li>
+                </ul>
+            </div>
+        </div>);
     },
 
     render() {
         const appProperties = this.getAppProperties();
+
+        const text = this.state.searchInputData.get('text');
 
         let resultListView = null;
         if (this.state.searchResultData.get('multi')) {
@@ -556,6 +496,7 @@ export default React.createClass({
                 <div className="row">
                     <LeftSection>
                         {this.renderFilterInputs()}
+                        {this.renderFacets()}
                     </LeftSection>
                     <MidSection>
                         <div className="section">
@@ -563,12 +504,15 @@ export default React.createClass({
                                 Mode = {this.state.searchInputData.get('mode', 'organic')}, Type = {this.state.searchInputData.get('type', '')}
                             </div>
                             {this.renderSearchForm()}
+                        </div>
+                        <DidYouMeanList
+                          data={{suggestionsData: this.state.didYouMeanResultData, text, filter: this.state.searchInputData.get('filter')}}
+                          appProperties={this.getAppProperties()}/>
+                        <div className="section">
                             <div className="right-align time-taken">
                                 Total Time: {this.state.searchResultData.get('totalTimeTaken')}ms, Service Time: {this.state.searchResultData.get('serviceTimeTaken')}ms, Query
                                 Time: {this.state.searchResultData.get('queryTimeTaken')}ms
                             </div>
-                        </div>
-                        <div className="section">
                             <div className="total-results">
                                 Total Results: {this.state.searchResultData.get('totalResults')}
                             </div>
@@ -576,7 +520,12 @@ export default React.createClass({
                         </div>
                     </MidSection>
                     <RightSection>
-                        {this.renderSuggestedQueries()}
+                        <div className="section">
+                            {this.renderConfigInputs()}
+                        </div>
+                        <div className="section">
+                            {this.renderSuggestedQueries()}
+                        </div>
                     </RightSection>
                 </div>
             </main>

@@ -11,16 +11,12 @@ export default class extends FluxStore {
 
         this.searchInputStore = searchInputStore;
 
-        this.data = Immutable.fromJS({suggestions: null, count: 5, hideWeakSuggestions: true});
+        this.data = Immutable.fromJS({suggestions: null, count: 5});
 
         // setup listeners on search input store
         this.searchInputStore.addListener(`UPDATE:${EVENT_SEARCH_PARAMS_UPDATE}`, () => this.fetchSuggestions());
         this.searchInputStore.addListener(`UPDATE:${EVENT_FILTER_UPDATE}`, () => this.fetchSuggestions());
         this.searchInputStore.addListener(`UPDATE:${EVENT_SEARCH_TEXT_UPDATE}`, () => this.fetchSuggestions());
-    }
-
-    hideWeakSuggestions(value) {
-        this.updateData(this.data.set('hideWeakSuggestions', value));
     }
 
     setSuggestionCount(count) {
@@ -84,12 +80,14 @@ export default class extends FluxStore {
 
         const filter = this.searchInputStore.data.get('filter').toJS();
         const count = this.data.get('count');
+        
+        const fuzzySearch = this.searchInputStore.data.get('fuzzySearch');
 
         const requestTime = Date.now();
 
         //this.socket.emit('autocomplete', {request: {text, count, filter, requestTime}});
 
-        return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/autocomplete`, {text, count, filter, requestTime})
+        return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/autocomplete`, {text, count, filter, requestTime, fuzzySearch})
           .then((response) => {
               this.relevancyScores = null;
               

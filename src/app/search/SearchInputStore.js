@@ -14,7 +14,15 @@ export default class extends FluxStore {
 
         this.relevancyScores = [];
 
-        this.data = Immutable.fromJS({text: null, filter: {lang: {primary: 'en', secondary: []}}});
+        this.data = Immutable.fromJS({weakResults: true, fuzzySearch: true, text: null, filter: {lang: {primary: 'en', secondary: []}}});
+    }
+
+    toggleWeakResults(value) {
+        this.updateData(this.data.set('weakResults', value));
+    }
+
+    toggleFuzzySearch(value) {
+        this.updateData(this.data.set('fuzzySearch', value));
     }
 
     paginate(page, type) {

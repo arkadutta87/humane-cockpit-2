@@ -1,172 +1,21 @@
-import _ from 'lodash';
-import Immutable from 'immutable';
 import React from 'react';
 import QueryString from 'qs';
-
 import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxControllerMixin';
-
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
 import LeftSection from 'reactjs-web-boilerplate/lib/app/components/LeftSection';
 import RightSection from 'reactjs-web-boilerplate/lib/app/components/RightSection';
-
 import {default as SearchInputStore} from './SearchInputStore';
 import {default as AutocompleteStore} from './AutocompleteStore';
+import {default as DidYouMeanStore} from './DidYouMeanStore';
+import {DidYouMeanList} from './components/DidYouMeanList';
+import {AutocompleteSuggestionList} from './components/AutocompleteSuggestionList';
 
 const AutocompleteStoreKey = 'AutocompleteStore';
-
+const DidYouMeanStoreKey = 'DidYouMeanStore';
 const SearchInputStoreKey = 'SearchInputStore';
 
 //<a target="_blank" style={{marginLeft: 15}} href={`/analyze/explain/autocomplete/${suggestion.get('_id')}`}>Explain</a>
-
-const suggestionValue = (data, appProperties) => {
-    const suggestion = data.suggestion;
-
-    const properties = data.properties;
-    const statFields = properties && properties.get('statFields') || Immutable.List();
-    const valueField = properties && properties.get('valueField') || 'value';
-    const unicodeValueField = properties && properties.get('unicodeValueField') || 'unicodeValue';
-
-    const searchMode = properties && properties.get('searchMode');
-    const searchType = properties && properties.get('searchType');
-
-    let display = properties && _.isFunction(properties.get('display')) && properties.get('display')(suggestion);
-    if (!display) {
-        const displayField = properties && properties.get('displayField') || 'unicodeValue';
-        if (suggestion.get('_lang')) {
-            display = `${suggestion.get(displayField)} (${suggestion.get('_lang')})`;
-        } else {
-            display = suggestion.get(displayField);
-        }
-    }
-
-    let url = null;
-    if (searchMode) {
-        let queryParams = {
-            text: suggestion.get(valueField),
-            unicodeText: suggestion.get(unicodeValueField),
-
-            //lang: suggestion.get('_lang'),
-            filter: data.filter.toJS(),
-            originalInput: data.inputText
-        };
-
-        queryParams = _.assign(queryParams, {mode: searchMode, type: searchType});
-
-        url = `${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
-    }
-
-    let title = null;
-    if (url) {
-        title = <a target="_blank" href={url}>{display}</a>;
-    } else {
-        title = <span>{display}</span>;
-    }
-
-    const statKeys = [];
-    const statValues = [];
-    statFields.forEach(field => field.forEach((value, key) => {
-        statKeys.push(<th key={key}>{key}</th>);
-        statValues.push(<td key={key}>{suggestion.get(value)}</td>);
-    }));
-
-    let weakSuggestionDisclaimer = null;
-    if (suggestion.get('_weakResult')) {
-        weakSuggestionDisclaimer = <div style={{backgroundColor: 'yellow', textAlign: 'center'}}>This is a weak suggestion.</div>;
-    }
-
-    return (<div className="suggestion-value">
-        <div>
-            {title}
-            <a target="_blank" style={{marginLeft: 30, fontSize: '0.8em'}}
-               href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/analyze/termVectors/${suggestion.get('_type')}/${suggestion.get('_id')}`}>Term Vectors</a>
-        </div>
-        <table className="bordered suggestion-stats">
-            <thead>
-            <tr>
-                <th>Score</th>
-                <th>Weight</th>
-                {statKeys}
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>{suggestion.get('_score').toFixed(5)}</td>
-                <td>{suggestion.get('_weight')}</td>
-                {statValues}
-            </tr>
-            </tbody>
-        </table>
-        {weakSuggestionDisclaimer}
-    </div>);
-};
-
-const Suggestion = (props) => (<div className="suggestion card">
-    <div className="card-body">
-        {suggestionValue(props.data, props.appProperties)}
-    </div>
-</div>);
-
-Suggestion.propTypes = {
-    data: React.PropTypes.object.isRequired,
-    appProperties: React.PropTypes.object.isRequired
-};
-
-const SuggestionList = (props) => {
-    if (!props.data) {
-        return (<noscript/>);
-    }
-
-    const text = props.data.text;
-    const filter = props.data.filter;
-    const suggestions = props.data.suggestionsData.get('suggestions');
-    const hideWeakSuggestions = props.data.suggestionsData.get('hideWeakSuggestions');
-
-    if (!text || !suggestions) {
-        return (<noscript/>);
-    }
-
-    const suggestionViews = [];
-
-    const buildSuggestionViews = (key, results) => {
-        if (results.count() > 0) {
-            const properties = props.appProperties.getIn(['autocomplete', key]);
-            const name = properties && properties.get('name') || key;
-
-            suggestionViews.push(<div className="section small" key={key}>
-                <div className="suggestion-section-heading"><strong>{name} suggestions: {results.count() || 0}</strong></div>
-                {results.filter(suggestion => !hideWeakSuggestions || !suggestion.get('_weakResult')).map((suggestion, index) => <Suggestion data={{suggestion, filter, text, key, properties}}
-                                                                                                                                                 appProperties={props.appProperties}
-                                                                                                                                                 key={`${key}-${index}`}/>)}
-            </div>);
-        }
-    };
-
-    // if multiple types of results - then resultGroups => {key : { type, results, totalResults }}
-    // if single type of results - then { type, results, totalResults }
-    if (suggestions.get('multi')) {
-        suggestions.get('results').forEach((value, key) => {
-            buildSuggestionViews(key, value.get('results'));
-        });
-    } else {
-        const results = suggestions.get('results');
-        const key = suggestions.get('name');
-
-        buildSuggestionViews(key, results);
-    }
-
-    return (<div className="suggestions">
-        <div className="section small time-taken right-align">
-            Total Time: {props.data.suggestionsData.get('totalTimeTaken')}ms, Service Time: {suggestions.get('serviceTimeTaken')}ms, Query Time: {suggestions.get('queryTimeTaken')}ms
-        </div>
-        {suggestionViews}
-    </div>);
-};
-
-SuggestionList.propTypes = {
-    data: React.PropTypes.object.isRequired,
-    appProperties: React.PropTypes.object.isRequired
-};
 
 export default React.createClass({
     mixins: [FluxControllerMixin],
@@ -174,15 +23,18 @@ export default React.createClass({
     getInitialState() {
         const searchInputStore = this.searchInputStore = this.getFluxController().createStore(SearchInputStore, SearchInputStoreKey);
         this.autocompleteResultStore = this.getFluxController().createStore(AutocompleteStore, AutocompleteStoreKey, searchInputStore);
+        this.didYouMeanResultStore = this.getFluxController().createStore(DidYouMeanStore, DidYouMeanStoreKey, searchInputStore);
 
         this.registerStores({
             [SearchInputStoreKey]: {dataKey: 'searchInputData'},
-            [AutocompleteStoreKey]: {dataKey: 'autocompleteResultData'}
+            [AutocompleteStoreKey]: {dataKey: 'autocompleteResultData'},
+            [DidYouMeanStoreKey]: {dataKey: 'didYouMeanResultData'}
         });
 
         return {
             searchInputData: this.searchInputStore.data,
-            autocompleteResultData: this.autocompleteResultStore.data
+            autocompleteResultData: this.autocompleteResultStore.data,
+            didYouMeanResultData: this.didYouMeanResultStore.data
         };
     },
 
@@ -232,8 +84,12 @@ export default React.createClass({
         this.autocompleteResultStore.setSuggestionCount(count);
     },
 
-    handleHideWeakSuggestionsChange(e) {
-        this.autocompleteResultStore.hideWeakSuggestions(e.target.checked);
+    handleWeakResultsToggle(e) {
+        this.searchInputStore.toggleWeakResults(e.target.checked);
+    },
+
+    handleFuzzySearchToggle(e) {
+        this.searchInputStore.toggleFuzzySearch(e.target.checked);
     },
 
     handleFilterCollapsibleClick(e) {
@@ -327,7 +183,8 @@ export default React.createClass({
     renderConfigInputs() {
         const suggestionCount = this.state.autocompleteResultData.get('count');
 
-        const hideWeakSuggestions = this.state.autocompleteResultData.get('hideWeakSuggestions');
+        const weakResults = this.state.searchInputData.get('weakResults');
+        const fuzzySearch = this.state.searchInputData.get('fuzzySearch');
 
         return (<div className="card">
             <div className="card-header">
@@ -336,8 +193,12 @@ export default React.createClass({
             <div className="card-body">
                 <ul className="radio-group row">
                     <li className="col s24">
-                        <input type="checkbox" id="hideWeakSuggestionsInput" value={hideWeakSuggestions} checked={hideWeakSuggestions} onChange={this.handleHideWeakSuggestionsChange}/>
-                        <label htmlFor="hideWeakSuggestionsInput">Hide Weak Suggestions</label>
+                        <input type="checkbox" id="toggleWeakResultsInput" value={weakResults} checked={weakResults} onChange={this.handleWeakResultsToggle}/>
+                        <label htmlFor="toggleWeakResultsInput">Weak Suggestions</label>
+                    </li>
+                    <li className="col s24">
+                        <input type="checkbox" id="toggleFuzzyInput" value={fuzzySearch} checked={fuzzySearch} onChange={this.handleFuzzySearchToggle}/>
+                        <label htmlFor="toggleFuzzyInput">Fuzzy Search</label>
                     </li>
                 </ul>
                 <div className="range-field-section">
@@ -379,6 +240,8 @@ export default React.createClass({
     render() {
         const text = this.state.searchInputData.get('text');
 
+        const weakResults = this.state.searchInputData.get('weakResults');
+
         return (<div className="page-content cockpit-page autocomplete-page">
             <header>
                 <NavBarContainer>
@@ -394,8 +257,11 @@ export default React.createClass({
                         <div>
                             {this.renderSearchForm()}
                         </div>
-                        <SuggestionList
-                          data={{suggestionsData: this.state.autocompleteResultData, text, filter: this.state.searchInputData.get('filter')}}
+                        <DidYouMeanList
+                          data={{suggestionsData: this.state.didYouMeanResultData, text, filter: this.state.searchInputData.get('filter')}}
+                          appProperties={this.getAppProperties()}/>
+                        <AutocompleteSuggestionList
+                          data={{suggestionsData: this.state.autocompleteResultData, weakResults, text, filter: this.state.searchInputData.get('filter')}}
                           appProperties={this.getAppProperties()}/>
                     </MidSection>
                     <RightSection>
