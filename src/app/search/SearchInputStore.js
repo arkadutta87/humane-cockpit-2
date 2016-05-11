@@ -22,7 +22,7 @@ export default class extends FluxStore {
     }
 
     toggleFuzzySearch(value) {
-        this.updateData(this.data.set('fuzzySearch', value));
+        this.updateData(this.data.set('fuzzySearch', value), EVENT_SEARCH_PARAMS_UPDATE);
     }
 
     paginate(page, type) {
@@ -89,5 +89,24 @@ export default class extends FluxStore {
 
     removeSecondaryLanguage(lang) {
         this.updateData(this.data.updateIn(['filter', 'lang', 'secondary'], (secondary) => secondary.filterNot((val) => val === lang)), EVENT_FILTER_UPDATE);
+    }
+
+    addFacet(key, value) {
+        let data = this.data;
+        if (!data.getIn(['filter', key])) {
+            data = data.setIn(['filter', key], Immutable.fromJS({values: [], type: 'facet'}));
+        }
+
+        this.updateData(data.updateIn(['filter', key, 'values'], (values) => values.push(value)), EVENT_FILTER_UPDATE);
+    }
+
+    removeFacet(key, value) {
+        let data = this.data.updateIn(['filter', key, 'values'], (values) => values.filterNot((val) => val === value));
+
+        if (data.getIn(['filter', key, 'values']).count() === 0) {
+            data = data.deleteIn(['filter', key]);
+        }
+
+        this.updateData(data, EVENT_FILTER_UPDATE);
     }
 }

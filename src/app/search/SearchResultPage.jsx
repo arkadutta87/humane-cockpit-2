@@ -216,11 +216,11 @@ export default React.createClass({
     },
 
     handleSearchInputEnter(e) {
-        if (e.keyCode !== 13) {
-            return;
-        }
+        // if (e.keyCode !== 13) {
+        //     return;
+        // }
 
-        this.searchInputStore.updateSearchParams({mode: 'organic'});
+        // this.searchInputStore.updateSearchParams({mode: 'organic'});
     },
 
     handlePrimaryLanguageChange(e) {
@@ -245,6 +245,16 @@ export default React.createClass({
         this.searchInputStore.toggleFuzzySearch(e.target.checked);
     },
 
+    handleFacetChange(key) {
+        return (e) => {
+            if (e.target.checked) {
+                this.searchInputStore.addFacet(key, e.target.value);
+            } else {
+                this.searchInputStore.removeFacet(key, e.target.value);
+            }
+        };
+    },
+
     renderPrimaryLanguages() {
         const primaryLanguages = this.getAppProperties().get('primaryLanguages');
 
@@ -265,7 +275,7 @@ export default React.createClass({
                     const id = `radio${langKey}`;
                     const checked = this.state.searchInputData.getIn(['filter', 'lang', 'primary']) === langCode;
                     return (<li className="col s12" key={id}>
-                        <input name="primaryLanguages" type="radio" id={id} value={langCode} onChange={this.handlePrimaryLanguageChange} checked={checked}/>
+                        <input name="primaryLanguages" type="radio" id={id} value={langCode || ''} onChange={this.handlePrimaryLanguageChange} checked={checked}/>
                         <label htmlFor={id}>{langKey} ({langUnicode})</label>
                     </li>);
                 })}
@@ -295,7 +305,7 @@ export default React.createClass({
                     const checked = !disabled && this.state.searchInputData.getIn(['filter', 'lang', 'secondary'])
                       && this.state.searchInputData.getIn(['filter', 'lang', 'secondary']).some((code) => code === langCode);
                     return (<li className="col s12" key={id}>
-                        <input type="checkbox" id={id} value={langCode} onChange={this.handleSecondaryLanguageChange} disabled={disabled} checked={checked}/>
+                        <input type="checkbox" id={id} value={langCode || ''} onChange={this.handleSecondaryLanguageChange} disabled={disabled} checked={checked}/>
                         <label htmlFor={id}>{langKey} ({langUnicode})</label>
                     </li>);
                 })}
@@ -310,17 +320,23 @@ export default React.createClass({
             const facetViews = facets.entrySeq().map(entry => {
                 const facetName = entry[0];
 
+                const handleFacetChange = this.handleFacetChange(facetName);
+
                 const facetValueViews = entry[1].map(value => {
                     const key = value.get('key');
                     const count = value.get('count');
 
-                    return (<li className="col s12" key={key} disabled="true">
-                        <input type="checkbox" id={key} value={key}/>
+                    const checkedValues = this.state.searchInputData.getIn(['filter', facetName, 'values']);
+
+                    const checked = checkedValues && checkedValues.some((code) => code === key);
+                    
+                    return (<li className="col s12" key={key}>
+                        <input type="checkbox" id={key} value={key || ''} onChange={handleFacetChange} checked={checked}/>
                         <label htmlFor={key}>{key} ({count})</label>
                     </li>);
                 });
 
-                return (<div className="card">
+                return (<div className="card" key={facetName}>
                     <div className="card-header">
                         <h6 className="center-align">{facetName}</h6>
                     </div>
@@ -390,7 +406,7 @@ export default React.createClass({
                        id="text"
                        autoComplete="off"
                        placeholder="Your Search Query"
-                       value={text}
+                       value={text || ''}
                        onChange={this.handleSearchTextChange}
                        onKeyUp={this.handleSearchInputEnter}/>
             </div>

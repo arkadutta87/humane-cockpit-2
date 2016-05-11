@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import Immutable from 'immutable';
 import FluxStore from 'reactjs-web-boilerplate/lib/app/flux/FluxStore';
-import {EVENT_SEARCH_PARAMS_UPDATE, EVENT_FILTER_UPDATE, EVENT_PAGE_UPDATE} from './SearchInputStore';
+import {EVENT_SEARCH_PARAMS_UPDATE, EVENT_FILTER_UPDATE, EVENT_PAGE_UPDATE, EVENT_SEARCH_TEXT_UPDATE} from './SearchInputStore';
 
 const PageSize = 5;
 
@@ -19,12 +19,7 @@ export default class extends FluxStore {
         this.searchInputStore.addListener(`UPDATE:${EVENT_SEARCH_PARAMS_UPDATE}`, () => this.fetchSearchResults());
         this.searchInputStore.addListener(`UPDATE:${EVENT_FILTER_UPDATE}`, () => this.fetchSearchResults());
         this.searchInputStore.addListener(`UPDATE:${EVENT_PAGE_UPDATE}`, () => this.fetchSearchResults());
-    }
-
-    hideWeakResults(value) {
-        this.updateData(this.data.set('hideWeakResults', value));
-
-        return this.fetchSearchResults();
+        this.searchInputStore.addListener(`UPDATE:${EVENT_SEARCH_TEXT_UPDATE}`, () => this.fetchSearchResults());
     }
 
     markWeakResults(results, name) {
