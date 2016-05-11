@@ -322,7 +322,7 @@ export default React.createClass({
 
                 const handleFacetChange = this.handleFacetChange(facetName);
 
-                const facetValueViews = entry[1].map(value => {
+                const facetValueViews = entry[1].filter(value => !_.isEmpty(value.get('key'))).map(value => {
                     const key = value.get('key');
                     const count = value.get('count');
 
