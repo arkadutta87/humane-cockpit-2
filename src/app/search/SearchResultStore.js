@@ -3,6 +3,8 @@ import Immutable from 'immutable';
 import FluxStore from 'reactjs-web-boilerplate/lib/app/flux/FluxStore';
 import {EVENT_SEARCH_PARAMS_UPDATE, EVENT_FILTER_UPDATE, EVENT_PAGE_UPDATE, EVENT_SEARCH_TEXT_UPDATE} from './SearchInputStore';
 
+import WeakResultsMarker from './WeakResultsMarker';
+
 const PageSize = 5;
 
 export default class extends FluxStore {
@@ -20,49 +22,8 @@ export default class extends FluxStore {
         this.searchInputStore.addListener(`UPDATE:${EVENT_FILTER_UPDATE}`, () => this.fetchSearchResults());
         this.searchInputStore.addListener(`UPDATE:${EVENT_PAGE_UPDATE}`, () => this.fetchSearchResults());
         this.searchInputStore.addListener(`UPDATE:${EVENT_SEARCH_TEXT_UPDATE}`, () => this.fetchSearchResults());
-    }
 
-    markWeakResults(results, name) {
-        if (!this.relevancyScores) {
-            this.relevancyScores = {};
-        }
-        
-        if (!this.relevancyScores[name]) {
-            this.relevancyScores[name] = [];
-        }
-        
-        const relevancyScores = this.relevancyScores[name];
-
-        _.forEach(results, result => {
-            result._relevancy = result._score / (result._weight || 1.0);
-            relevancyScores.push(result._relevancy);
-        });
-
-        // sort relevancy scores
-        relevancyScores.sort((scoreA, scoreB) => scoreB - scoreA);
-
-        // iterate over the relevancy scores to find point at which score drops suddenly.
-        let previousRelevancy = 0;
-        let deflectionScore = 0;
-        _.forEach(relevancyScores, score => {
-            if (previousRelevancy && score < 0.5 * previousRelevancy) {
-                deflectionScore = previousRelevancy;
-                return false;
-            }
-
-            previousRelevancy = score;
-
-            return true;
-        });
-
-        _.forEach(results, result => {
-            if (result._relevancy >= deflectionScore) {
-                return true;
-            }
-
-            result._weakResult = true;
-            return true;
-        });
+        this.weakResultsMarker = new WeakResultsMarker();
     }
 
     fetchSearchResults() {
@@ -91,21 +52,15 @@ export default class extends FluxStore {
               let data = this.data;
 
               if (page === 0) {
-                  this.relevancyScores = null;
+                  console.log('Resetting weak results marker');
+                  this.weakResultsMarker.reset();
                   data = data.set('results', null);
               }
 
               if (response && response.entity) {
                   const multi = data.get('multi') || response.entity.multi;
 
-                  if (response.entity.multi) {
-                      _(response.entity.results).values().forEach(resultGroup => {
-                          this.markWeakResults(resultGroup.results, resultGroup.name);
-                          return true;
-                      });
-                  } else {
-                      this.markWeakResults(response.entity.results, response.entity.name);
-                  }
+                  this.weakResultsMarker.mark(response.entity);
 
                   if (multi) {
                       let existingResultGroups = data.get('results') || Immutable.Map();
