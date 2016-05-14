@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+/* eslint-disable no-underscore-dangle */
+
 export default class WeakSuggestionMarker {
 
     reset() {
