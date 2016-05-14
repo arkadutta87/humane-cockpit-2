@@ -20,6 +20,10 @@
         margin: 0;
       }
 
+      table.details {
+        table-layout: fixed;
+      }
+
       .details {
         //padding: 1rem;
         margin-top: 1rem;
@@ -30,6 +34,7 @@
         }
 
         td {
+          word-wrap: break-word;
           padding: 5px;
 
           &.name {
