@@ -28,7 +28,7 @@ const DataView = (props) => {
     const viewConfig = props.viewConfig;
 
     const results = props.data.get('results') && props.data.get('results').map(result =>
-        (<DataRow data={result} key={result.get('unicode')} viewConfig={viewConfig}/>));
+        (<DataRow data={result} key={result.get('key')} viewConfig={viewConfig}/>));
 
     return (<table className="value-list bordered centered">
         <thead>
