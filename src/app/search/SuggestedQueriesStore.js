@@ -14,35 +14,35 @@ export default class extends FluxStore {
         this.searchInputStore = searchInputStore;
 
         // setup listeners on search input store
-        this.searchInputStore.addListener(`UPDATE:${EVENT_SEARCH_PARAMS_UPDATE}`, () => this.fetchSuggestedQueries());
-        this.searchInputStore.addListener(`UPDATE:${EVENT_FILTER_UPDATE}`, () => this.fetchSuggestedQueries());
-        this.searchInputStore.addListener(`UPDATE:${EVENT_PAGE_UPDATE}`, () => this.fetchSuggestedQueries());
+        // this.searchInputStore.addListener(`UPDATE:${EVENT_SEARCH_PARAMS_UPDATE}`, () => this.fetchSuggestedQueries());
+        // this.searchInputStore.addListener(`UPDATE:${EVENT_FILTER_UPDATE}`, () => this.fetchSuggestedQueries());
+        // this.searchInputStore.addListener(`UPDATE:${EVENT_PAGE_UPDATE}`, () => this.fetchSuggestedQueries());
     }
 
     noSuggestions() {
-        return this.updateData(this.data.set('suggestions', null).set('totalTimeTaken', null));
+        // return this.updateData(this.data.set('suggestions', null).set('totalTimeTaken', null));
     }
 
     fetchSuggestedQueries() {
-        const text = this.searchInputStore.data.get('text');
-        if (!text) {
-            return this.noSuggestions();
-        }
-
-        const filter = this.searchInputStore.data.get('filter').toJS();
-        const count = this.searchInputStore.data.get('count');
-
-        const requestTime = Date.now();
-
-        return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/suggestedQueries`, {text, count, filter, requestTime})
-          .then((result) => {
-              const totalTimeTaken = (Date.now() - requestTime);
-              if (result && result.entity) {
-                  return this.updateData(this.data.set('suggestions', Immutable.fromJS(result.entity)).set('totalTimeTaken', totalTimeTaken));
-              }
-
-              return this.noSuggestions();
-          })
-          .catch(() => this.noSuggestions());
+        // const text = this.searchInputStore.data.get('text');
+        // if (!text) {
+        //     return this.noSuggestions();
+        // }
+        //
+        // const filter = this.searchInputStore.data.get('filter').toJS();
+        // const count = this.searchInputStore.data.get('count');
+        //
+        // const requestTime = Date.now();
+        //
+        // return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/suggestedQueries`, {text, count, filter, requestTime})
+        //   .then((result) => {
+        //       const totalTimeTaken = (Date.now() - requestTime);
+        //       if (result && result.entity) {
+        //           return this.updateData(this.data.set('suggestions', Immutable.fromJS(result.entity)).set('totalTimeTaken', totalTimeTaken));
+        //       }
+        //
+        //       return this.noSuggestions();
+        //   })
+        //   .catch(() => this.noSuggestions());
     }
 }
