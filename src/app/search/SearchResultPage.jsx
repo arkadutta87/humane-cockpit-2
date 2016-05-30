@@ -61,14 +61,14 @@ const SearchResult = (props) => {
                     } else if (type === 'Chip') {
                         const uniqueSet = {};
                         value = value.filter(item => {
-                              item = item.trim();
-                              if (!item || item === '' || uniqueSet[item]) {
-                                  return false;
-                              }
+                            item = item.trim();
+                            if (!item || item === '' || uniqueSet[item]) {
+                                return false;
+                            }
 
-                              uniqueSet[item] = true;
-                              return true;
-                          })
+                            uniqueSet[item] = true;
+                            return true;
+                        })
                           .map(item => <span className="category chip small" key={item}>{item}</span>);
                     } else if (type === 'Table') {
                         value = (<table>
@@ -329,7 +329,7 @@ export default React.createClass({
                     const checkedValues = this.state.searchInputData.getIn(['filter', facetName, 'values']);
 
                     const checked = checkedValues && checkedValues.some((code) => code === key);
-                    
+
                     return (<li className="col s12" key={key}>
                         <input type="checkbox" id={key} value={key || ''} onChange={handleFacetChange} checked={checked}/>
                         <label htmlFor={key}>{key} ({count})</label>

@@ -1,9 +1,6 @@
-import _ from 'lodash';
 import React from 'react';
 import QueryString from 'qs';
-
 import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxControllerMixin';
-
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
 import LeftSection from 'reactjs-web-boilerplate/lib/app/components/LeftSection';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
@@ -30,15 +27,11 @@ const View = (props) => {
         const viewType = props.data.getIn(['params', 'type']);
         const filter = props.data.getIn(['params', 'filter']);
 
-        console.log('Filter: ', filter.toJS());
-
         const params = QueryString.stringify({
             filter: filter && filter.toJS(),
             __view_key__: props.data.get('key'),
             __view_type__: type
         }, {allowDots: true});
-
-        console.log('Params: ', params);
 
         const url = `${props.appProperties && props.appProperties.get('cockpitUrlPrefix') || ''}/data-view/${viewType}?${params}`;
 
