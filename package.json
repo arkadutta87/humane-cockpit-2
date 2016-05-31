@@ -23,7 +23,7 @@
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-router": "^2.4.1",
-    "reactjs-web-boilerplate": "^1.2.0",
+    "reactjs-web-boilerplate": "^1.2.1",
     "socket.io-client": "^1.4.6"
   },
   "devDependencies": {

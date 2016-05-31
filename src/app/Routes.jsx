@@ -12,7 +12,7 @@ import TermVectorsPage from './search/TermVectorsPage';
 import ExplainSearchResultPage from './search/ExplainSearchResultPage';
 
 export default function (appProperties) {
-    return (<Route path={appProperties && appProperties.get('multiInstance') ? '/:instanceName' : '/'} component={IndexPage}>
+    return (<Route path={appProperties && appProperties.get('routesPrefix') || '/'} component={IndexPage}>
         <IndexRoute component={CockpitHomePage}/>
         <Route path="data-view/:type" component={DataViewPage}/>
         <Route path="autocomplete" component={AutocompletePage}/>
