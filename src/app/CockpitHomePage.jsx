@@ -33,7 +33,7 @@ const View = (props) => {
             __view_type__: type
         }, {allowDots: true});
 
-        const url = `${props.appProperties && props.appProperties.get('cockpitUrlPrefix') || ''}/data-view/${viewType}?${params}`;
+        const url = `${props.appProperties && props.appProperties.get('baseUrl') || ''}/data-view/${viewType}?${params}`;
 
         return (<li>
             <a href={url} target="_blank">{name}</a>
@@ -77,7 +77,7 @@ export default React.createClass({
                             <h3 className="underline">Demos</h3>
                             <ul>
                                 <li>
-                                    <a href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/autocomplete`} target="_blank">
+                                    <a href={`${appProperties && appProperties.get('baseUrl') || ''}/autocomplete`} target="_blank">
                                         Autocomplete Demo
                                     </a>
                                 </li>

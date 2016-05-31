@@ -48,7 +48,7 @@ const buildSuggestionView = (suggestion, filter, text, appProperties) => {
 
         queryParams = _.assign(queryParams, {mode: searchMode, type: searchType});
 
-        url = `${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
+        url = `${appProperties && appProperties.get('baseUrl') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
     }
 
     return {id: suggestion.get('_id'), display, url, name, unicodeKey, enKey, displayKey};

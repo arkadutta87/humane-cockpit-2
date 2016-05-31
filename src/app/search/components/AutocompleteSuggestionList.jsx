@@ -37,7 +37,7 @@ const suggestionValue = (data, appProperties) => {
 
         queryParams = _.assign(queryParams, {mode: searchMode, type: searchType});
 
-        url = `${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
+        url = `${appProperties && appProperties.get('baseUrl') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
     }
 
     let title = null;
@@ -63,7 +63,7 @@ const suggestionValue = (data, appProperties) => {
         <div>
             {title}
             <a target="_blank" style={{marginLeft: 30, fontSize: '0.8em'}}
-               href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/analyze/termVectors/${suggestion.get('_type')}/${suggestion.get('_id')}`}>Term Vectors</a>
+               href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/termVectors/${suggestion.get('_type')}/${suggestion.get('_id')}`}>Term Vectors</a>
         </div>
         <table className="bordered suggestion-stats">
             <thead>

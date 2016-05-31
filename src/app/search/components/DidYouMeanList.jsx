@@ -14,7 +14,7 @@ const DidYouMeanResult = (props) => {
 
     queryParams = _.assign(queryParams, {mode: 'organic'});
 
-    const url = `${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
+    const url = `${appProperties && appProperties.get('baseUrl') || ''}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`;
 
     let view = null;
     if (url) {

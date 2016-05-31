@@ -60,9 +60,7 @@ export default React.createClass({
             mode: 'organic'
         };
 
-        const cockpitUrlPrefix = this.getAppProperties().get('cockpitUrlPrefix', '');
-
-        window.open(`${cockpitUrlPrefix}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`, '_blank');
+        window.open(`${this.getAppProperties().get('baseUrl', '')}/search-results?${QueryString.stringify(queryParams, {allowDots: true})}`, '_blank');
     },
 
     handlePrimaryLanguageChange(e) {

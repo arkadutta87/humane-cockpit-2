@@ -124,9 +124,9 @@ const SearchResult = (props) => {
                         <td className="value">
                             <span>{result.get('_id')}</span>
                             <a target="_blank" style={{marginLeft: 15}}
-                               href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/analyze/explain/search/${result.get('_id')}${location.search}`}>Explain</a>
+                               href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/explain/search/${result.get('_id')}${location.search}`}>Explain</a>
                             <a target="_blank" style={{marginLeft: 15}}
-                               href={`${appProperties && appProperties.get('cockpitUrlPrefix') || ''}/analyze/termVectors/${result.get('_type')}/${result.get('_id')}`}>Term Vectors</a>
+                               href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/termVectors/${result.get('_type')}/${result.get('_id')}`}>Term Vectors</a>
                         </td>
                     </tr>
                     <tr>
