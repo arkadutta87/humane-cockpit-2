@@ -57,7 +57,7 @@ const SearchResult = (props) => {
                     } else if (type === 'Duration') {
                         value = moment(value).fromNow();
                     } else if (type === 'Image') {
-                        value = <img src={value}/>;
+                        value = <img src={value} role="presentation"/>;
                     } else if (type === 'Chip') {
                         const uniqueSet = {};
                         value = value.filter(item => {
@@ -71,21 +71,23 @@ const SearchResult = (props) => {
                         })
                           .map(item => <span className="category chip small" key={item}>{item}</span>);
                     } else if (type === 'Table') {
+                        const itemView = value.map(item =>
+                          (<tr key={item.get(valueProperty.get('idField' || 'id'))}>
+                              {valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map(column => <td key={column[0]}>{item.get(column[1])}</td>))}
+                          </tr>));
+
                         value = (<table>
                             <thead>
-                            <tr>
-                                {
-                                    valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map(column => <th key={column[0]}>{column[1]}</th>))
-                                }
-                            </tr>
+                                <tr>
+                                    {
+                                        valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map(column => <th key={column[0]}>{column[1]}</th>))
+                                    }
+                                </tr>
                             </thead>
                             <tbody>
-                            {
-                                value.map(item =>
-                                  <tr key={item.get(valueProperty.get('idField' || 'id'))}>
-                                      {valueProperty.get('tableFields').map(tableField => tableField.entrySeq().map(column => <td key={column[0]}>{item.get(column[1])}</td>))}
-                                  </tr>)
-                            }
+                                {
+                                    itemView
+                                }
                             </tbody>
                         </table>);
                     }
@@ -119,38 +121,42 @@ const SearchResult = (props) => {
             <div className="row layout">
                 <table className="col s24 right details bordered">
                     <tbody>
-                    <tr>
-                        <td className="name">Id</td>
-                        <td className="value">
-                            <span>{result.get('_id')}</span>
-                            <a target="_blank" style={{marginLeft: 15}}
-                               href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/explain/search/${result.get('_id')}${location.search}`}>Explain</a>
-                            <a target="_blank" style={{marginLeft: 15}}
-                               href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/termVectors/${result.get('_type')}/${result.get('_id')}`}>Term Vectors</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td className="name">Stats</td>
-                        <td className="value">
-                            <table className="suggestion-stats">
-                                <thead>
-                                <tr>
-                                    <th>Score</th>
-                                    <th>Weight</th>
-                                    {statKeys}
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>{result.get('_score').toFixed(5)}</td>
-                                    <td>{result.get('_weight')}</td>
-                                    {statValues}
-                                </tr>
-                                </tbody>
-                            </table>
-                        </td>
-                    </tr>
-                    {fieldViewList}
+                        <tr>
+                            <td className="name">Id</td>
+                            <td className="value">
+                                <span>{result.get('_id')}</span>
+                                <a
+                                  target="_blank"
+                                  style={{marginLeft: 15}}
+                                  href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/explain/search/${result.get('_id')}${location.search}`}>Explain</a>
+                                <a
+                                  target="_blank"
+                                  style={{marginLeft: 15}}
+                                  href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/termVectors/${result.get('_type')}/${result.get('_id')}`}>Term Vectors</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td className="name">Stats</td>
+                            <td className="value">
+                                <table className="suggestion-stats">
+                                    <thead>
+                                        <tr>
+                                            <th>Score</th>
+                                            <th>Weight</th>
+                                            {statKeys}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>{result.get('_score').toFixed(5)}</td>
+                                            <td>{result.get('_weight')}</td>
+                                            {statValues}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        {fieldViewList}
                     </tbody>
                 </table>
             </div>
@@ -378,12 +384,11 @@ export default React.createClass({
         }
 
         return (<div className="card">
-              <div className="card-header">
-                  <h6 className="center-align">Filter</h6>
-              </div>
-              {filterViews}
-          </div>
-        );
+            <div className="card-header">
+                <h6 className="center-align">Filter</h6>
+            </div>
+            {filterViews}
+        </div>);
     },
 
     renderSuggestedQueries() {
@@ -401,14 +406,15 @@ export default React.createClass({
         return (<form role="form" className="autocomplete-form" action="javascript:void(0);">
 
             <div className="input-field">
-                <input type="text"
-                       className="validate"
-                       id="text"
-                       autoComplete="off"
-                       placeholder="Your Search Query"
-                       value={text || ''}
-                       onChange={this.handleSearchTextChange}
-                       onKeyUp={this.handleSearchInputEnter}/>
+                <input
+                  type="text"
+                  className="validate"
+                  id="text"
+                  autoComplete="off"
+                  placeholder="Your Search Query"
+                  value={text || ''}
+                  onChange={this.handleSearchTextChange}
+                  onKeyUp={this.handleSearchInputEnter}/>
             </div>
         </form>);
     },

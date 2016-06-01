@@ -1,12 +1,9 @@
 import React from 'react';
 import Immutable from 'immutable';
-
 import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxControllerMixin';
-
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
 import LeftSection from 'reactjs-web-boilerplate/lib/app/components/LeftSection';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
-
 import {default as TermVectorsStore} from './TermVectorsStore';
 
 const StoreKey = 'TermVectorsStore';
@@ -15,16 +12,16 @@ const Heading = (props) =>
   (<div className="section heading">
       <table className="params">
           <tbody>
-          <tr>
-              <td className="param-key">Id</td>
-              <td>-</td>
-              <td className="param-value">{props.data.getIn(['params', 'id'])}</td>
-          </tr>
-          <tr>
-              <td className="param-key">Type</td>
-              <td>-</td>
-              <td className="param-value">{props.data.getIn(['params', 'type'])}</td>
-          </tr>
+              <tr>
+                  <td className="param-key">Id</td>
+                  <td>-</td>
+                  <td className="param-value">{props.data.getIn(['params', 'id'])}</td>
+              </tr>
+              <tr>
+                  <td className="param-key">Type</td>
+                  <td>-</td>
+                  <td className="param-value">{props.data.getIn(['params', 'type'])}</td>
+              </tr>
           </tbody>
       </table>
       <div className="time-taken">

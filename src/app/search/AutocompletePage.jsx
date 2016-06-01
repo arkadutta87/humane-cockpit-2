@@ -170,12 +170,11 @@ export default React.createClass({
         }
 
         return (<div className="card">
-              <div className="card-header">
-                  <h6 className="center-align">Filter</h6>
-              </div>
-              {this.renderFilterInputBody()}
-          </div>
-        );
+            <div className="card-header">
+                <h6 className="center-align">Filter</h6>
+            </div>
+            {this.renderFilterInputBody()}
+        </div>);
     },
 
     renderConfigInputs() {
@@ -202,13 +201,14 @@ export default React.createClass({
                 <div className="range-field-section">
                     <strong className="range-field-heading" htmlFor="range">Suggestions count: </strong>
                     <div className="range-field">
-                        <input type="range"
-                               id="range"
-                               value={suggestionCount}
-                               min="1"
-                               max="15"
-                               step="1"
-                               onChange={this.handleSuggestionCountChange}
+                        <input
+                          type="range"
+                          id="range"
+                          value={suggestionCount}
+                          min="1"
+                          max="15"
+                          step="1"
+                          onChange={this.handleSuggestionCountChange}
                         />
                     </div>
                     <output className="range-field-output chip" htmlFor="id">{suggestionCount}</output>
@@ -223,14 +223,15 @@ export default React.createClass({
         return (<form role="form" className="autocomplete-form" action="javascript:void(0);">
 
             <div className="input-field">
-                <input type="text"
-                       className="validate"
-                       id="text"
-                       autoComplete="off"
-                       placeholder="Your Search Query"
-                       value={text}
-                       onChange={this.handleSearchTextChange}
-                       onKeyUp={this.handleSearchInputEnter}/>
+                <input 
+                  type="text"
+                  className="validate"
+                  id="text"
+                  autoComplete="off"
+                  placeholder="Your Search Query"
+                  value={text}
+                  onChange={this.handleSearchTextChange}
+                  onKeyUp={this.handleSearchInputEnter}/>
             </div>
         </form>);
     },

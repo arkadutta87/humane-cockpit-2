@@ -1,9 +1,9 @@
-import _ from 'lodash';
+// import _ from 'lodash';
 import Immutable from 'immutable';
 
 import FluxStore from 'reactjs-web-boilerplate/lib/app/flux/FluxStore';
 
-import {EVENT_SEARCH_PARAMS_UPDATE, EVENT_FILTER_UPDATE, EVENT_PAGE_UPDATE} from './SearchInputStore';
+// import {EVENT_SEARCH_PARAMS_UPDATE, EVENT_FILTER_UPDATE, EVENT_PAGE_UPDATE} from './SearchInputStore';
 
 export default class extends FluxStore {
     constructor(key, fluxContext, fluxController, searchInputStore) {

@@ -1,8 +1,6 @@
-import _ from 'lodash';
 import Immutable from 'immutable';
 import FluxStore from 'reactjs-web-boilerplate/lib/app/flux/FluxStore';
 import {EVENT_SEARCH_PARAMS_UPDATE, EVENT_FILTER_UPDATE, EVENT_PAGE_UPDATE, EVENT_SEARCH_TEXT_UPDATE} from './SearchInputStore';
-
 import WeakResultsMarker from './WeakResultsMarker';
 
 const PageSize = 5;
@@ -45,7 +43,17 @@ export default class extends FluxStore {
 
         const requestTime = Date.now();
 
-        return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/search`, {count, page, text, unicodeText, originalInput, /*lang,*/ filter, mode, type, fuzzySearch})
+        return this.fluxContext.restClient.post(`${this.fluxController.appProperties.get('searcherApi')}/search`, {
+            count,
+            page,
+            text,
+            unicodeText,
+            originalInput, /*lang,*/
+            filter,
+            mode,
+            type,
+            fuzzySearch
+        })
           .then((response) => {
               const totalTimeTaken = (Date.now() - requestTime);
 
@@ -65,7 +73,9 @@ export default class extends FluxStore {
                   if (multi) {
                       let existingResultGroups = data.get('results') || Immutable.Map();
 
-                      const results = response.entity.multi ? response.entity.results : {[response.entity.name || response.entity.type]: response.entity};
+                      const results = response.entity.multi
+                        ? response.entity.results
+                        : {[response.entity.name || response.entity.type]: response.entity};
 
                       Immutable.fromJS(results).entrySeq().forEach(value => {
                           const key = value[0];
@@ -117,7 +127,8 @@ export default class extends FluxStore {
               return this.updateData(data);
           })
           .catch(error => {
-              console.error(`Error in posting to: ${this.fluxController.appProperties.get('searcherApi')}/search}`, this.searchInputStore.data, error);
+              console.error(`Error in posting to: ${this.fluxController.appProperties.get('searcherApi')}/search}`,
+                this.searchInputStore.data, error);
           });
     }
 }

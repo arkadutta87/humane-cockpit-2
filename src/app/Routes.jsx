@@ -1,8 +1,5 @@
 import React from 'react';
-import { Route, IndexRoute } from 'react-router';
-
-const NotFoundPage = () => (<h1>Page Not found</h1>);
-
+import {Route, IndexRoute} from 'react-router';
 import IndexPage from './IndexPage';
 import CockpitHomePage from './CockpitHomePage';
 import DataViewPage from './views/DataViewPage';
@@ -10,6 +7,8 @@ import AutocompletePage from './search/AutocompletePage';
 import SearchResultPage from './search/SearchResultPage';
 import TermVectorsPage from './search/TermVectorsPage';
 import ExplainSearchResultPage from './search/ExplainSearchResultPage';
+
+const NotFoundPage = () => (<h1>Page Not found</h1>);
 
 export default function () {
     return (<Route path="/" component={IndexPage}>

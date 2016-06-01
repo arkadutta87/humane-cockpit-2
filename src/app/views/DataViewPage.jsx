@@ -2,13 +2,10 @@ import _ from 'lodash';
 import React from 'react';
 import Immutable from 'immutable';
 import QueryString from 'qs';
-
 import FluxControllerMixin from 'reactjs-web-boilerplate/lib/app/flux/FluxControllerMixin';
-
 import NavBarContainer from 'reactjs-web-boilerplate/lib/app/components/NavBarContainer';
 import LeftSection from 'reactjs-web-boilerplate/lib/app/components/LeftSection';
 import MidSection from 'reactjs-web-boilerplate/lib/app/components/MidSection';
-
 import {default as DataViewStore} from './DataViewStore';
 
 const DataRow = (props) =>
@@ -32,12 +29,12 @@ const DataView = (props) => {
 
     return (<table className="value-list bordered centered">
         <thead>
-        <tr>
-            {viewConfig.get('fields').map(field => field.keySeq().map((key, index) => <th key={index}><h6>{key}</h6></th>))}
-        </tr>
+            <tr>
+                {viewConfig.get('fields').map(field => field.keySeq().map((key, index) => <th key={index}><h6>{key}</h6></th>))}
+            </tr>
         </thead>
         <tbody>
-        {results}
+            {results}
         </tbody>
     </table>);
 };
@@ -52,21 +49,21 @@ const Heading = (props) => {
     return (<div className="section heading">
         <table className="params">
             <tbody>
-            <tr>
-                <td className="param-key">Data</td>
-                <td>-</td>
-                <td className="param-value">{viewConfig.get('name')}</td>
-            </tr>
-            <tr>
-                <td className="param-key">Type</td>
-                <td>-</td>
-                <td className="param-value">{_.capitalize(viewConfig.getIn(['params', 'type']))}</td>
-            </tr>
-            <tr>
-                <td className="param-key">Filters</td>
-                <td>-</td>
-                <td className="param-value">{JSON.stringify(viewConfig.getIn(['params', 'filter']))}</td>
-            </tr>
+                <tr>
+                    <td className="param-key">Data</td>
+                    <td>-</td>
+                    <td className="param-value">{viewConfig.get('name')}</td>
+                </tr>
+                <tr>
+                    <td className="param-key">Type</td>
+                    <td>-</td>
+                    <td className="param-value">{_.capitalize(viewConfig.getIn(['params', 'type']))}</td>
+                </tr>
+                <tr>
+                    <td className="param-key">Filters</td>
+                    <td>-</td>
+                    <td className="param-value">{JSON.stringify(viewConfig.getIn(['params', 'filter']))}</td>
+                </tr>
             </tbody>
         </table>
         <div className="time-taken">
