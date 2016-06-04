@@ -15,7 +15,7 @@
     "bluebird": "3.4.0",
     "classnames": "2.2.5",
     "eslint": "2.11.1",
-    "eslint-config-360fy": "1.1.9",
+    "eslint-config-360fy": "1.1.10",
     "events": "1.1.0",
     "immutable": "3.8.1",
     "lodash": "4.13.1",
@@ -24,7 +24,7 @@
     "react": "15.1.0",
     "react-dom": "15.1.0",
     "react-router": "2.4.1",
-    "reactjs-web-boilerplate": "1.2.4",
+    "reactjs-web-boilerplate": "1.2.5",
     "socket.io-client": "1.4.6"
   },
   "devDependencies": {
@@ -33,7 +33,7 @@
     "babel-preset-node5": "11.1.0",
     "babel-preset-react": "6.5.0",
     "eslint": "2.11.1",
-    "eslint-config-360fy": "1.1.9",
+    "eslint-config-360fy": "1.1.10",
     "eslint-plugin-react": "5.1.1"
   },
   "eslintConfig": {
