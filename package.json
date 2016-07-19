@@ -10,7 +10,7 @@
     "prepublish": "npm run compile"
   },
   "author": "Shailendra Sharma",
-  "license": "MIT",
+  "license": "LGPL",
   "dependencies": {
     "bluebird": "3.4.0",
     "classnames": "2.2.5",
