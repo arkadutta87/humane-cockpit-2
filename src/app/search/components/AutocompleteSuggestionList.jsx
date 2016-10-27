@@ -62,23 +62,26 @@ const suggestionValue = (data, appProperties) => {
     return (<div className="suggestion-value">
         <div>
             {title}
-            <a target="_blank" style={{marginLeft: 30, fontSize: '0.8em'}}
-               href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/termVectors/${suggestion.get('_type')}/${suggestion.get('_id')}`}>Term Vectors</a>
+            <a
+              target="_blank"
+              style={{marginLeft: 30, fontSize: '0.8em'}}
+              href={`${appProperties && appProperties.get('baseUrl') || ''}/analyze/termVectors/${suggestion.get('_type')}/${suggestion.get('_id')}`}>Term Vectors</a>
+            <span style={{float: 'right'}}>[{data.key}]</span>
         </div>
         <table className="bordered suggestion-stats">
             <thead>
-            <tr>
-                <th>Score</th>
-                <th>Weight</th>
-                {statKeys}
-            </tr>
+                <tr>
+                    <th>Score</th>
+                    <th>Weight</th>
+                    {statKeys}
+                </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>{suggestion.get('_score').toFixed(5)}</td>
-                <td>{suggestion.get('_weight')}</td>
-                {statValues}
-            </tr>
+                <tr>
+                    <td>{suggestion.get('_score').toFixed(5)}</td>
+                    <td>{suggestion.get('_weight')}</td>
+                    {statValues}
+                </tr>
             </tbody>
         </table>
         {weakSuggestionDisclaimer}
@@ -123,7 +126,16 @@ export const AutocompleteSuggestionList = (props) => {
                     results
                       .filter(suggestion => weakResults || !suggestion.get('_weakResult'))
                       .map((suggestion, index) =>
-                        <Suggestion data={{suggestion, filter, text, key, properties}} appProperties={props.appProperties} key={`${key}-${index}`}/>)
+                        <Suggestion
+                          data={{
+                              suggestion,
+                              filter,
+                              text,
+                              key: suggestion.get('_type'),
+                              properties: props.appProperties.getIn(['autocomplete', suggestion.get('_type')])
+                          }}
+                          appProperties={props.appProperties}
+                          key={`${key}-${index}`}/>)
                 }
             </div>);
         }
