@@ -1,40 +1,61 @@
 {
-  "name": "humane-cockpit",
+  "name": "humane-cockpit-2",
   "version": "1.3.16",
   "description": "Cockpit module for Humane Search",
   "repository": "git@github.com:360fy/humane-cockpit.git",
   "scripts": {
     "lint": "eslint ./src/",
     "clean": "rm -rf lib/",
-    "compile": "npm run lint && npm run clean && babel -d lib/ src/",
+    "compile": "npm run lint && npm run clean && babel -d lib/ src/ && webpack --progress --colors",
     "prepublish": "npm run compile"
+  },
+  "bin": {
+    "cockpit-server": "./server.js",
+    "cockpit-indexer": "./indexer.js"
   },
   "author": "Shailendra Sharma",
   "license": "LGPL",
   "dependencies": {
     "bluebird": "3.4.0",
     "classnames": "2.2.5",
+    "command-line-boilerplate": "1.1.7",
+    "config-boilerplate": "1.1.6",
+    "d3": "4.0.0",
+    "dateformat": "^2.0.0",
     "eslint": "2.11.1",
     "eslint-config-360fy": "1.1.10",
+    "event-stream": "^3.3.4",
     "events": "1.1.0",
+    "expressjs-boilerplate": "git+https://github.com/arkadutta87/expressjs-boilerplate.git",
+    "humane-node-commons": "1.4.1",
     "immutable": "3.8.1",
+    "line-reader": "0.4.0",
     "lodash": "4.13.1",
+    "md5": "2.1.0",
     "moment": "2.13.0",
+    "node-rest-client": "2.0.1",
+    "node-sass": "3.8.0",
+    "plugin-boilerplate": "1.1.0",
     "qs": "6.2.0",
     "react": "15.1.0",
     "react-dom": "15.1.0",
     "react-router": "2.4.1",
-    "reactjs-web-boilerplate": "1.2.5",
-    "socket.io-client": "1.4.6"
+    "reactjs-web-boilerplate": "git+https://github.com/arkadutta87/reactjs-web-boilerplate.git",
+    "socket.io-client": "1.4.6",
+    "stream": "0.0.2",
+    "util": "^0.10.3",
+    "webpack-builder-boilerplate": "1.2.2"
   },
   "devDependencies": {
+    "babel-cli": "6.18.0",
     "babel-core": "6.9.1",
     "babel-plugin-transform-runtime": "6.9.0",
     "babel-preset-node5": "11.1.0",
     "babel-preset-react": "6.5.0",
     "eslint": "2.11.1",
     "eslint-config-360fy": "1.1.10",
-    "eslint-plugin-react": "5.1.1"
+    "eslint-plugin-react": "5.1.1",
+    "webpack-builder-boilerplate": "1.2.2"
   },
   "eslintConfig": {
     "extends": "360fy"
