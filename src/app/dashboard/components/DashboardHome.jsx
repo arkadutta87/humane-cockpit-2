@@ -9,11 +9,12 @@ import BarChart from './../../search/components/BarChart';
 
 const DashboardStoreKey = 'DashboardHomeStore';
 
-const ConfigData = {
+let ConfigData = {
     selected_data: {
         category: 'search',
         percentage: 5,
-        time_interval: 60
+        time_interval: 60,
+        instance_name: ''
     },
     data_barchart_ua: [
         {letter: 'chrome', frequency: 171},
@@ -120,11 +121,20 @@ const ConfigData = {
  alt="User-Agent Wise Representation" width="100%"/>
  */
 
+const userContext = '__userContext__';
+
 let dashboardHome = React.createClass({
 
     mixins: [FluxControllerMixin],
 
     getInitialState() {
+        const userContxtObj = this.getAppProperties().get(userContext);
+        if (userContxtObj) {
+            //const userName = userContxtObj.get('name');
+            const instanceName = userContxtObj.get('instanceName');
+            ConfigData.selected_data.instance_name = instanceName;
+        }
+
         this.store = this.getFluxController().createStore(Store, DashboardStoreKey, ConfigData);
 
         this.registerStores({

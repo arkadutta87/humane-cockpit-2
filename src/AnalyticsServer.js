@@ -1387,21 +1387,23 @@ class AnalyticsInternal {
         const __index = 'humane_cockpit';
         const __type = 'log_collection';
 
-        const instanceType = 'carDekho';
+        //const instanceType = 'carDekho';
 
         const succ = 'SUCCESS';
         let blockPercentage = null;
         let timePeriod = null;
         let category = null;
+        let instanceType = null;
 
 
         blockPercentage = request.percentage;
         timePeriod = request.time_period;
         category = request.category;
+        instanceType = request.instance_name;
 
 
-        if (blockPercentage != null && timePeriod != null && category != null) {
-            console.log(`Input value -- ${blockPercentage}:${timePeriod}:${category}`);
+        if (blockPercentage && timePeriod && category && instanceType) {
+            console.log(`Input value -- ${blockPercentage}:${timePeriod}:${category}:${instanceType}`);
         } else {
             return this.errorMsg('Input data absent');
         }
@@ -1553,6 +1555,196 @@ class AnalyticsInternal {
             });
     }
 
+    visualizationNilResults(request) {
+        console.log(JSON.stringify(request));
+
+        const __index = 'humane_cockpit';
+        const __type = 'log_collection';
+
+        //const instanceType = 'carDekho';
+
+        const succ = 'SUCCESS';
+        let blockPercentage = null;
+        let timePeriod = null;
+        let category = null;
+        let instanceType = null;
+
+
+        blockPercentage = request.percentage;
+        timePeriod = request.time_period;
+        category = request.category;
+        instanceType = request.instance_name;
+
+
+        if (blockPercentage && timePeriod && category && instanceType) {
+            console.log(`Input value -- ${blockPercentage}:${timePeriod}:${category}:${instanceType}`);
+        } else {
+            return this.errorMsg('Input data absent');
+        }
+        const initialDateStr = '20161222180001';//'20161204000000';//2016122218
+
+        let dt = moment(initialDateStr, 'YYYYMMDDHHmmss');
+        dt = dt.subtract({minutes: timePeriod});
+
+        console.log(`Date after substraction : ${dt.toString()}`);
+
+        const dateStr = dt.format('YYYYMMDDHHmmss');
+
+        //console.log(`Moment conversion -- ${dt.format('')}`);
+
+        let requestTypeStr = 'query:search';
+        if (category === 'autocomplete') {
+            requestTypeStr = 'query:autocomplete';
+        }
+
+        //const dateStr = dateFormat(dt, 'yyyymmddhhMMss');
+        console.log(`Date String range : ${dateStr}`);
+
+        const postObj1 = {
+            query: {
+                bool: {
+                    must: [
+                        { match: {requestType: requestTypeStr} },
+                        {
+                            range: {
+                                zeroCounts: {
+                                    gt: 0
+
+                                }
+                            }
+                        }
+                    ],
+                    filter: [
+                        {
+                            range: {
+                                timePoint: {
+                                    from: dateStr,
+                                    to: 'now'
+                                }
+                            }
+                        },
+                        {
+                            match: {instanceName: instanceType}
+                        }
+                    ]
+                }
+            },
+            size: 0,
+            aggs: {
+                distinct_terms: {
+                    cardinality: {
+                        field: 'query.keyword'
+                    }
+                },
+                total_count: {
+                    sum: {
+                        field: 'zeroCounts'
+                    }
+                }
+            }
+        };
+
+        //query 1
+        return Promise.resolve(this.esClient.queryPostBasicSearch(__index, __type, postObj1))
+            .then((response) => {
+                //console.log(`ES response --- \n${JSON.stringify(response)}`);
+
+                const msg = request.message;
+                //return {code: 0, message: `Message sent : ${msg}`, esMsg: response};
+                try {
+                    //const avgLatency = response.aggregations.avg_latency.value;
+                    const totalSearchQueries = response.aggregations.total_count.value;
+                    //const avgResultsReturned = response.aggregations.avg_results_returned.value;
+
+                    const numberOfBuckets = response.aggregations.distinct_terms.value;
+                    let size1 = (numberOfBuckets * blockPercentage) / 100;
+
+                    size1 = Math.round(size1);
+                    console.log(`Size of block : ${size1}`);
+
+                    const postObj2 = {
+                        query: {
+                            bool: {
+                                must: [
+                                    { match: {requestType: requestTypeStr} },
+                                    {
+                                        range: {
+                                            zeroCounts: {
+                                                gt: 0
+
+                                            }
+                                        }
+                                    }
+                                ],
+                                filter: [
+                                    {
+                                        range: {
+                                            timePoint: {
+                                                from: dateStr,
+                                                to: 'now'
+                                            }
+                                        }
+                                    },
+                                    {
+                                        match: {instanceName: instanceType}
+                                    }
+                                ]
+                            }
+                        },
+                        size: 0,
+                        aggs: {
+                            group_by_query: {
+                                terms: {
+                                    field: 'query.keyword',
+                                    order: {
+                                        sum_count: 'desc'
+                                    },
+                                    size: numberOfBuckets
+                                },
+                                aggs: {
+                                    sum_count: {
+                                        sum: {
+                                            field: 'zeroCounts'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    //query 3
+                    return Promise.resolve(this.esClient.queryPostBasicSearch(__index, __type, postObj2))
+                        .then((response3) => {
+                            try {
+                                let arr1 = response3.aggregations.group_by_query.buckets;
+                                arr1 = arr1.slice(0, size1);
+                                const arr2 = arr1.map((obj) => {
+                                    const key1 = obj.key;
+                                    const count1 = obj.sum_count.value;
+
+                                    return {key: key1, count: count1};
+                                });
+
+                                return {
+                                    code: 0,
+                                    message: succ,
+                                    data: {
+                                        //average_latency: avgLatency,
+                                        queries_count: totalSearchQueries,
+                                        //average_results_returned: avgResultsReturned,
+                                        bucket: arr2
+                                    }
+                                };
+                            } catch (e) {
+                                return this.errorMsg(e);
+                            }
+                        });
+                } catch (e) {
+                    return this.errorMsg(e);
+                }
+            });
+    }
+
 
     // TODO: later on this aggregation shall happen using redis cache and at a frequency, not immediate
     // let signals that require replace value come through different APIs
@@ -1673,6 +1865,10 @@ export default class AnalyticsServer {
         return this.errorWrap('testPost', request, this.internal.visualization(request));
     }
 
+    visualizationNilResults(headers, request) {
+        return this.errorWrap('testPost', request, this.internal.visualizationNilResults(request));
+    }
+
     /*remove(headers, request) {
      return this.errorWrap('remove', request, this.internal.remove(request));
      }
@@ -1699,7 +1895,8 @@ export default class AnalyticsServer {
             'dummyapi/first': {handler: this.dummyResponse, method: 'get'},
             'dummyapi/d3/second': {handler: this.dummyResponse2, method: 'get'},
             'es/search': {handler: this.esSearchResult, method: 'get'},
-            'dashboard/visualizationSearch': {handler: this.visualization, method: 'post'}
+            'dashboard/visualizationSearch': {handler: this.visualization, method: 'post'},
+            'dashboard/visualizationNilResultSearch': {handler: this.visualizationNilResults, method: 'post'}
             //'signal/:type:/:id': {handler: this.addSignal, method: 'put'},
             /*signal: {handler: this.addSignal, method: 'put'},
              upsert: {handler: this.upsert},

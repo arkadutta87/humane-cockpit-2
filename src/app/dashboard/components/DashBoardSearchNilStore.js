@@ -46,7 +46,7 @@ class DashboardHomeStore extends FluxStore {
         const requestTime = Date.now();
         console.log('We are inside hitServerForSearchQueriesVisualization ');
 
-        const apiURL = '/analytics/api/dashboard/visualizationSearch';
+        const apiURL = '/analytics/api/dashboard/visualizationNilResultSearch';
         const postObj = {
             category: data.category,
             percentage: data.percentage,
@@ -73,7 +73,7 @@ class DashboardHomeStore extends FluxStore {
                         const actData = this.data.toJS();
 
                         actData.summary.Total_Search_Queries = chartData.queries_count;
-                        actData.summary.Average_Response_Time = Math.round(chartData.average_latency * 100) / 100;
+                        //actData.summary.Average_Response_Time = Math.round(chartData.average_latency * 100) / 100;
 
                         const timePro = data.time_interval / 60;
                         let timeStr = '';
