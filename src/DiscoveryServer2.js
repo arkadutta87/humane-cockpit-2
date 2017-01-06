@@ -9,6 +9,7 @@ import buildServer from 'expressjs-boilerplate/lib/server/Server';
 import md5 from 'md5';
 import fs from 'fs';
 import AnalyticsServer from './AnalyticsServer';
+import constants from './../constants';
 
 
 //
@@ -138,6 +139,11 @@ export default class Server {
             return configTmp;
         }
 
+        //passwordless config
+        const configuration = JSON.parse(
+            fs.readFileSync(constants.configurationFile)
+        );
+
         console.log(`Arka Config 2 -- ${JSON.stringify(_this.configs)}`);
         // build indexer, searcher and add them to services
         const logDirectory = this.logDirectory || Path.join(OS.homedir(), 'humane_discovery_logs');
@@ -147,7 +153,7 @@ export default class Server {
         // create directory if it does not exist
         mkdirp.sync(logDirectory);
 
-        buildServer({
+        const mainConfig = {
             port: this.port,
 
             logDirectory,
@@ -165,7 +171,15 @@ export default class Server {
                 publicPath: Path.join(__dirname, '../public'),
                 resourcesPath: Path.join(__dirname, '../__public__')
             }
-        });
+        };
+
+        if (configuration.passwordless) {
+            mainConfig.login_config = configuration.passwordless;
+
+            console.log(`\n\n configuration loaded --- ${mainConfig.login_config}   \n\n`);
+        }
+
+        buildServer(mainConfig);
 
         this._built = true;
 
