@@ -131,3 +131,7 @@
   font-size: 0.89rem;
   text-decoration: underline;
 }
+
+.nav>li>a:focus, .nav>li>a:hover {
+  background-color: transparent;
+}
